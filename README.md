@@ -38,8 +38,6 @@ $ bundle
 
 The tag of the event.
 
-`*` can be used as a placeholder that expands to the actual metric name. For example, with the default tag value `kubernetes.metrics.*`, it will emit node cpu usage metric with tag `kubernetes.metrics.node.cpu.usage`.
-
 Default value: `kubernetes.metrics.*`.
 
 ### interval (time) (optional)
@@ -50,7 +48,37 @@ Default value: `15s`.
 
 ### kubeconfig (string) (required)
 
-Path to a kubeconfig file points to a cluster the plugin should collect metrics from. Mostly useful when running fluentd outside of the cluster.
+Path to a kubeconfig file points to a cluster the plugin should collect metrics from. Mostly useful when running fluentd outside of the cluster. When `kubeconfig` is set, `kubernetes_url`, `client_cert`, `client_key`, `ca_file`, `insecure_ssl`, `bearer_token_file`, and `secret_dir` will all be ignored.
+
+### kubernetes_url (string) (optional)
+
+URL of the kubernetes API server.
+
+### client_cert (string) (optional)
+
+Path to the certificate file for this client.
+
+### client_key (string) (optional)
+
+Path to the private key file for this client.
+
+### ca_file (string) (optional)
+
+Path to the CA file.
+
+### insecure_ssl (bool) (optional)
+
+If `insecure_ssl` is set to `true`, it won't verify apiserver's certificate.
+
+### bearer_token_file (string) (optional)
+
+Path to the file contains the API token. By default it reads from the file "token" in the `secret_dir`.
+
+### secret_dir (string) (optional)
+
+Path of the location where pod's service account's credentials are stored.
+
+Default value: `/var/run/secrets/kubernetes.io/serviceaccount`.
 
 ### node_name (string) (required)
 

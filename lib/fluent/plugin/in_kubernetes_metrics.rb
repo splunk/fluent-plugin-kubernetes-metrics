@@ -32,8 +32,29 @@ module Fluent
       desc 'How often it pulls metrcs.'
       config_param :interval, :time, default: '15s'
 
-      desc 'Path to a kubeconfig file points to a cluster the plugin should collect metrics from. Mostly useful when running fluentd outside of the cluster.'
+      desc 'Path to a kubeconfig file points to a cluster the plugin should collect metrics from. Mostly useful when running fluentd outside of the cluster. When `kubeconfig` is set, `kubernetes_url`, `client_cert`, `client_key`, `ca_file`, `insecure_ssl`, `bearer_token_file`, and `secret_dir` will all be ignored.'
       config_param :kubeconfig, :string
+
+      desc 'URL of the kubernetes API server.'
+      config_param :kubernetes_url, :string, default: nil
+
+      desc 'Path to the certificate file for this client.'
+      config_param :client_cert, :string, default: nil
+
+      desc 'Path to the private key file for this client.'
+      config_param :client_key, :string, default: nil
+
+      desc 'Path to the CA file.'
+      config_param :ca_file, :string, default: nil
+
+      desc "If `insecure_ssl` is set to `true`, it won't verify apiserver's certificate."
+      config_param :insecure_ssl, :bool, default: false
+
+      desc 'Path to the file contains the API token. By default it reads from the file "token" in the `secret_dir`.'
+      config_param :bearer_token_file, :string, default: nil
+
+      desc "Path of the location where pod's service account's credentials are stored."
+      config_param :secret_dir, :string, default: '/var/run/secrets/kubernetes.io/serviceaccount'
 
       desc 'Name of the node that this plugin should collect metrics from.'
       config_param :node_name, :string
