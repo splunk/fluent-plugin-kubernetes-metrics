@@ -46,7 +46,7 @@ How often it pulls metrcs.
 
 Default value: `15s`.
 
-### kubeconfig (string) (required)
+### kubeconfig (string) (optional)
 
 Path to a kubeconfig file points to a cluster the plugin should collect metrics from. Mostly useful when running fluentd outside of the cluster. When `kubeconfig` is set, `kubernetes_url`, `client_cert`, `client_key`, `ca_file`, `insecure_ssl`, `bearer_token_file`, and `secret_dir` will all be ignored.
 

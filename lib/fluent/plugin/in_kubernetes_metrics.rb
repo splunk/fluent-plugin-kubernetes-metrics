@@ -33,7 +33,7 @@ module Fluent
       config_param :interval, :time, default: '15s'
 
       desc 'Path to a kubeconfig file points to a cluster the plugin should collect metrics from. Mostly useful when running fluentd outside of the cluster. When `kubeconfig` is set, `kubernetes_url`, `client_cert`, `client_key`, `ca_file`, `insecure_ssl`, `bearer_token_file`, and `secret_dir` will all be ignored.'
-      config_param :kubeconfig, :string
+      config_param :kubeconfig, :string, default: nil
 
       desc 'URL of the kubernetes API server.'
       config_param :kubernetes_url, :string, default: nil
@@ -290,8 +290,8 @@ module Fluent
 	labels['node'] = node_name
 
 	emit_uptime tag: tag, start_time: pod['startTime'], labels: labels
-	emit_cpu_metrics tag: tag, metrics: pod['cpu'], labels: labels
-	emit_memory_metrics tag: tag, metrics: pod['memory'], labels: labels
+	emit_cpu_metrics tag: tag, metrics: pod['cpu'], labels: labels if pod['cpu']
+	emit_memory_metrics tag: tag, metrics: pod['memory'], labels: labels if pod['memory']
 	emit_network_metrics tag: tag, metrics: pod['network'], labels: labels
 	emit_fs_metrics tag: "#{tag}.ephemeral-storage", metrics: pod['ephemeral-storage'], labels: labels
 	Array(pod['volume']).each do |volume|
