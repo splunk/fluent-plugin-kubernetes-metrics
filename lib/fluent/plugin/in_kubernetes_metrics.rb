@@ -18,6 +18,7 @@ require 'time'
 require "fluent/plugin/input"
 require 'kubeclient'
 require 'multi_json'
+require 'rest-client'
 
 module Fluent
   module Plugin
@@ -62,6 +63,9 @@ module Fluent
       desc 'The port that kubelet is listening to.'
       config_param :kubelet_port, :integer, default: 10255
 
+			desc 'URL of the kubelet API server.'
+			config_param :kubelet_url, :string, default: nil
+
       def configure(conf)
 	super
 
@@ -98,14 +102,17 @@ module Fluent
 	config = Kubeclient::Config.read @kubeconfig
 	current_context = config.context
 
-	@client = Kubeclient::Client.new(
-	  current_context.api_endpoint,
-	  current_context.api_version,
-	  options.merge({
-	    ssl_options: current_context.ssl_options,
-	    auth_options: current_context.auth_options
-	  })
-	)
+		# Use Kubernetes default service account if we're in a pod.
+	#
+	# @client = RestClient::Resource.new @kubelet_url.to_s
+	# 		Kubeclient::Client.new(
+	#   current_context.api_endpoint,
+	#   current_context.api_version,
+	#   options.merge({
+	#     ssl_options: current_context.ssl_options,
+	#     auth_options: current_context.auth_options
+	#   })
+	# )
       end
 
       def init_without_kubeconfig(options={})
@@ -115,7 +122,7 @@ module Fluent
 	  env_host = ENV['KUBERNETES_SERVICE_HOST']
 	  env_port = ENV['KUBERNETES_SERVICE_PORT']
 	  if env_host && env_port
-	    @kubernetes_url = "https://#{env_host}:#{env_port}/api/"
+	    @kubernetes_url = "https://#{env_host}:#{env_port}"
 	  end
 	end
 
@@ -159,28 +166,38 @@ module Fluent
       end
 
       def initialize_client
-	options = {
-	  timeouts: {
-	    open: 10,
-	    read: nil
-	  }
-	}
-	if @kubeconfig.nil?
-	  init_without_kubeconfig options
-	else
-	  init_with_kubeconfig options
-	end
+				env_host = 'localhost'
+				env_port = 10255
+				log.info("Use host #{@node_name} and port #{env_port} for creating client")
+
+				if env_host && env_port
+					@kubelet_url = "http://#{@node_name}:#{env_port}/stats/summary"
+				end
+
+
+				log.info("Use URL #{@kubelet_url} for creating client")
+	# options = {
+	#   timeouts: {
+	#     open: 10,
+	#     read: nil
+	#   }
+	# }
+	# if @kubeconfig.nil?
+	#   init_without_kubeconfig options
+	# else
+	#   init_with_kubeconfig options
+	# end
       end
 
       # @client.proxy_url only returns the url, but we need the resource, not just the url
       def summary_api
-	@summary_api ||=
-	  begin
-	    @client.discover unless @client.discovered
-	    @client.rest_client["/nodes/#{@node_name}:#{@kubelet_port}/proxy/stats/summary"].tap { |endpoint|
-	      log.info("Use URL #{endpoint.url} for scraping metrics")
-	    }
-	  end
+	@summary_api ||= @client
+	  # begin
+	  #   @client.discover unless @client.discovered
+	  #   @client.rest_client["/stats/summary"].tap { |endpoint|
+	  #     log.info("Use URL #{endpoint.url} for scraping metrics")
+	  #   }
+	  # end
 
       end
 
@@ -238,14 +255,16 @@ module Fluent
       end
 
       def emit_node_rlimit_metrics(node_name, rlimit)
-	time = parse_time rlimit['time']
-	%w[maxpid curproc].each do |metric_name|
-	  if value = rlimit[metric_name]
-	    router.emit(generate_tag("node.runtime.imagefs.#{metric_name}"), time, {
-	      'value' => value,
-		'node' => node_name
-	    })
-	  end
+        if rlimit != nil
+  	time = parse_time rlimit['time']
+  	%w[maxpid curproc].each do |metric_name|
+  	  if value = rlimit[metric_name]
+  	    router.emit(generate_tag("node.runtime.imagefs.#{metric_name}"), time, {
+  	      'value' => value,
+  		'node' => node_name
+  	    })
+  	  end
+    end
 	end
       end
 
@@ -268,10 +287,12 @@ module Fluent
 	emit_network_metrics tag: tag, metrics: node['network'], labels: labels
 	emit_fs_metrics tag: "#{tag}.fs", metrics: node['fs'], labels: labels
 	emit_fs_metrics tag: "#{tag}.imagefs", metrics: node['runtime']['imageFs'], labels: labels
-	emit_node_rlimit_metrics node_name, node['rlimit']
-	node["systemContainers"].each do |c|
+  emit_node_rlimit_metrics node_name, node['rlimit']
+  if node["systemContainers"] != nil
+  node["systemContainers"].each do |c|
 	  emit_system_container_metrics node_name, c
-	end
+  end
+    end
       end
 
       def emit_container_metrics(pod_labels, container)
@@ -307,8 +328,15 @@ module Fluent
 	Array(metrics['pods']).each &method(:emit_pod_metrics).curry.(metrics['node']['nodeName'])
       end
 
+			def request_options
+				options = { method: 'get', url: @kubelet_url}
+				return options
+				end
+
       def scrape_metrics
-	response = summary_api.get(@client.headers)
+				log.info("Use URL #{@kubelet_url} for creating client scraping metrics")
+
+	response = RestClient::Request.execute request_options
 	if response.code < 300
 	  @scraped_at = Time.now
 	  emit_metrics MultiJson.load(response.body)
