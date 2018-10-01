@@ -1,6 +1,7 @@
 # fluent-plugin-kubernetes-metrics
 
 [Fluentd](https://fluentd.org/) input plugin to collect kubernetes cluster metrics from the Summary API, exposed by [Kubelet](https://kubernetes.io/docs/admin/kubelet/) on each node.
+This input plugin can be configured to fetch metrics either from kube api server or from the kubelet itself. 
 
 ## Installation
 
@@ -82,7 +83,11 @@ Default value: `/var/run/secrets/kubernetes.io/serviceaccount`.
 
 ### node_name (string) (required)
 
-Name of the node that this plugin should collect metrics from.
+Used when use_rest_client config param is enabled. Name of the node that this plugin should collect metrics from. This enables the plugin to fetch metrics from kubelet api.
+
+### node_names Array(string) (required)
+
+Used when use_rest_client config param is not enabled. Name of the nodes that this plugin should collect metrics from. This enables the plugin to fetch metrics from kubeapiserver.
 
 ### kubelet_port (integer) (optional)
 
