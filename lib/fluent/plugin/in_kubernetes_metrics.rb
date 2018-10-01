@@ -56,16 +56,26 @@ module Fluent
       desc "Path of the location where pod's service account's credentials are stored."
       config_param :secret_dir, :string, default: '/var/run/secrets/kubernetes.io/serviceaccount'
 
-      desc 'Name of the node that this plugin should collect metrics from.'
-      config_param :node_name, :string
+			desc 'Name of the node that this plugin should collect metrics from.'
+			config_param :node_name, :string
+
+			desc 'Name of the nodes that this plugin should collect metrics from.'
+			config_param :node_names, :array, default: [], value_type: :string
 
       desc 'The port that kubelet is listening to.'
       config_param :kubelet_port, :integer, default: 10255
 
+			desc 'Use the rest client to get the metrics from summary api on each kubelet'
+			config_param :use_rest_client, :bool, default: true
+
       def configure(conf)
 	super
 
-	raise Fluentd::ConfigError, "node_name is required" if @node_name.nil? or @node_name.empty?
+	if @use_rest_client
+		raise Fluentd::ConfigError, "node_name is required" if @node_name.nil? or @node_name.empty?
+	else
+		raise Fluentd::ConfigError, "node_names array is required" if @node_names.nil? or @node_names.empty? or @node_name.length <= 0
+	end
 
 	parse_tag
 	initialize_client
@@ -159,25 +169,48 @@ module Fluent
       end
 
       def initialize_client
-	options = {
-	  timeouts: {
-	    open: 10,
-	    read: nil
-	  }
-	}
-	if @kubeconfig.nil?
-	  init_without_kubeconfig options
+
+	if @use_rest_client
+		initialize_rest_client
 	else
-	  init_with_kubeconfig options
+		options = {
+				timeouts: {
+						open: 10,
+						read: nil
+				}
+		}
+
+		if @kubeconfig.nil?
+			init_without_kubeconfig options
+		else
+			init_with_kubeconfig options
+		end
 	end
-      end
+			end
+
+			def initialize_rest_client
+	env_host = @node_name
+	env_port = 10255 # 10255 is the readonly port of the kubelet from where we can fetch the metrics exposed by summary API
+
+	if env_host && env_port
+		@kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
+	end
+
+	log.info("Use URL #{@kubelet_url} for creating client to query kubelet summary api")
+			end
+
+	# This method is used to set the options for sending a request to the kubelet api
+			def request_options
+	options = { method: 'get', url: @kubelet_url}
+	return options
+			end
 
       # @client.proxy_url only returns the url, but we need the resource, not just the url
-      def summary_api
-	@summary_api ||=
+      def summary_api(node)
+	@summary_api =
 	  begin
 	    @client.discover unless @client.discovered
-	    @client.rest_client["/nodes/#{@node_name}:#{@kubelet_port}/proxy/stats/summary"].tap { |endpoint|
+	    @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/stats/summary"].tap { |endpoint|
 	      log.info("Use URL #{endpoint.url} for scraping metrics")
 	    }
 	  end
@@ -262,16 +295,32 @@ module Fluent
 	tag = 'node'
 	labels = {'node' => node_name}
 
+	if node['startTime'] != nil
 	emit_uptime tag: tag, start_time: node['startTime'], labels: labels
+	end
+	if node['cpu'] != nil
 	emit_cpu_metrics tag: tag, metrics: node['cpu'], labels: labels
+	end
+	if node['memory'] != nil
 	emit_memory_metrics tag: tag, metrics: node['memory'], labels: labels
+	end
+	if node['network'] != nil
 	emit_network_metrics tag: tag, metrics: node['network'], labels: labels
+	end
+	if node['fs'] != nil
 	emit_fs_metrics tag: "#{tag}.fs", metrics: node['fs'], labels: labels
+	end
+	if node['runtime']['imageFs'] != nil
 	emit_fs_metrics tag: "#{tag}.imagefs", metrics: node['runtime']['imageFs'], labels: labels
+	end
+	if node['rlimit'] != nil
 	emit_node_rlimit_metrics node_name, node['rlimit']
+	end
+	if node["systemContainers"] != nil
 	node["systemContainers"].each do |c|
 	  emit_system_container_metrics node_name, c
 	end
+		end
       end
 
       def emit_container_metrics(pod_labels, container)
@@ -303,22 +352,38 @@ module Fluent
       end
 
       def emit_metrics(metrics)
+	if metrics['node'] != nil
 	emit_node_metrics(metrics['node'])
-	Array(metrics['pods']).each &method(:emit_pod_metrics).curry.(metrics['node']['nodeName'])
+	end
+	Array(metrics['pods']).each &method(:emit_pod_metrics).curry.(metrics['node']['nodeName']) if metrics['pods'] != nil
       end
 
       def scrape_metrics
-	response = summary_api.get(@client.headers)
-	if response.code < 300
-	  @scraped_at = Time.now
-	  emit_metrics MultiJson.load(response.body)
+	if @use_rest_client
+		response = RestClient::Request.execute request_options
+		handle_response(response)
 	else
-	  log.error "ExMultiJson.load(response.body)pected 2xx from summary API, but got #{response.code}. Response body = #{response.body}"
+		@node_names.each do |node|
+		response = summary_api(node).get(@client.headers)
+		handle_response(response)
+		end
 	end
-      rescue
+			end
+
+	# This method is used to handle responses from the kubelet summary api
+			def handle_response(response)
+	# Checking response codes only for a successful GET request viz., 2XX codes
+	if response.code < 300 and response.code > 199
+		@scraped_at = Time.now
+		emit_metrics MultiJson.load(response.body)
+	else
+		log.error "ExMultiJson.load(response.body) expected 2xx from summary API, but got #{response.code}. Response body = #{response.body}"
+	end
+	rescue
 	log.error "Failed to scrape metrics, error=#{$!}"
 	log.error_backtrace
-      end
+			end
+
     end
   end
 end
