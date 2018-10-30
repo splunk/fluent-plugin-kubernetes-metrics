@@ -68,6 +68,9 @@ module Fluent
       desc 'Use the rest client to get the metrics from summary api on each kubelet'
       config_param :use_rest_client, :bool, default: true
 
+      desc 'This option is used to get the metrics from summary api on each kubelet using ssl'
+      config_param :use_rest_client_ssl, :bool, default: false
+
       def configure(conf)
         super
 
@@ -189,10 +192,14 @@ module Fluent
 
       def initialize_rest_client
         env_host = @node_name
-        env_port = 10_255 # 10255 is the readonly port of the kubelet from where we can fetch the metrics exposed by summary API
+        env_port = @kubelet_port # 10255 is the readonly port of the kubelet from where we can fetch the metrics exposed by summary API
 
         if env_host && env_port
-          @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
+          if @use_rest_client_ssl == false
+            @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
+          else
+            @kubelet_url = "https://#{env_host}:10250/stats/summary"
+          end
         end
 
         log.info("Use URL #{@kubelet_url} for creating client to query kubelet summary api")
@@ -201,6 +208,24 @@ module Fluent
       # This method is used to set the options for sending a request to the kubelet api
       def request_options
         options = { method: 'get', url: @kubelet_url }
+        if @use_rest_client_ssl == false
+        else
+          if Dir.exist?(@secret_dir)
+            secret_ca_file = File.join(@secret_dir, 'ca.cert')
+
+            if @ca_file.nil? && File.exist?(secret_ca_file)
+              @ca_file = secret_ca_file
+            end
+
+          end
+          ssl_options = {
+            client_cert: @client_cert && OpenSSL::X509::Certificate.new(File.read(@client_cert)),
+            client_key:  @client_key && OpenSSL::PKey::RSA.new(File.read(@client_key)),
+            ca_file:     @ca_file,
+            verify_ssl:  @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
+          }
+          options = options.merge(ssl_options)
+        end
         options
       end
 
