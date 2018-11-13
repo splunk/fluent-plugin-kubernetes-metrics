@@ -3,9 +3,9 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-kubernetes-metrics"
-  spec.version = "1.0.0"
-  spec.authors = ["Gimi Liang"]
-  spec.email   = ["zliang@splunk.com"]
+  spec.version = "1.1.0.Alpha"
+  spec.authors = ["Don Tregonning", "Chaitanya Phalak"]
+  spec.email   = ["team-da-sf@splunk.com"]
 
   spec.summary       = %q{A fluentd input plugin that collects kubernetes cluster metrics.}
   spec.description   = %q{A fluentd input plugin that collects node and container metrics from a kubernetes cluster via summary API.}
@@ -23,6 +23,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.14"
   spec.add_development_dependency "rake", "~> 12.0"
   spec.add_development_dependency "test-unit", "~> 3.0"
+  spec.add_development_dependency "simplecov", "~> 0.16.1"
+  spec.add_development_dependency "webmock", "~> 3.4.2"
   spec.add_runtime_dependency "fluentd", [">= 0.14.10", "< 2"]
   spec.add_runtime_dependency "kubeclient", "~> 4.0"
   spec.add_runtime_dependency "multi_json", "~> 1.13"

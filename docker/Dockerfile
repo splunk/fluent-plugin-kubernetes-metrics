@@ -1,7 +1,7 @@
 FROM centos:7.5.1804
 
-LABEL maintainer="Gimi Liang <zliang@splunk.com>"
-LABEL Description="Splunk Connect for Kubernetes docker image" Vendor="Splunk Inc." Version="1.0"
+LABEL maintainer="Don Tregonning <dtregonning@splunk.com>, Chaitanya Phalak <cphalak@splunk.com>"
+LABEL Description="Splunk Connect for Kubernetes docker image" Vendor="Splunk Inc." Version="1.1.Alpha"
 
 COPY *.gem /tmp/
 RUN curl -L -o /tmp/epel-release-7-11.noarch.rpm http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm \
@@ -17,14 +17,14 @@ RUN curl -L -o /tmp/epel-release-7-11.noarch.rpm http://dl.fedoraproject.org/pub
  && ./configure \
  && make \
  && make install \
- && gem install -N fluentd:1.2.5 \
+ && gem install -N fluentd:1.3.0 \
                    fluent-plugin-systemd:1.0.1 \
                    fluent-plugin-concat:2.3.0 \
-                   fluent-plugin-prometheus:1.1.0 \
+                   fluent-plugin-prometheus:1.2.1 \
                    fluent-plugin-jq:0.5.1 \
-		   fluent-plugin-record-modifier:1.1.0 \
+                   fluent-plugin-record-modifier:1.1.0 \
                    fluent-plugin-splunk-hec:1.0.1 \
-                   oj:3.6.10 \
+                   oj:3.7.1 \
  && gem install -N /tmp/*.gem \
  && curl -L -o /usr/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 \
  && chmod +x /usr/bin/dumb-init \
