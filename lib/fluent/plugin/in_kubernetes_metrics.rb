@@ -1,5 +1,5 @@
 #
-# Copyright 2018- Gimi Liang
+# Copyright 2018- Splunk Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 # limitations under the License.
 
 require 'time'
-
 require 'fluent/plugin/input'
 require 'kubeclient'
 require 'multi_json'
@@ -89,6 +88,7 @@ module Fluent
 
       def close
         @watchers.each &:finish if @watchers
+
         super
       end
 
@@ -374,8 +374,8 @@ module Fluent
         else
           log.error "ExMultiJson.load(response.body) expected 2xx from summary API, but got #{response.code}. Response body = #{response.body}"
         end
-      rescue StandardError
-        log.error "Failed to scrape metrics, error=#{$ERROR_INFO}"
+      rescue StandardError => error
+        log.error "Failed to scrape metrics, error=#{error.inspect}"
         log.error_backtrace
       end
     end
