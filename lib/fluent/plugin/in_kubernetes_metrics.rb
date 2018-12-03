@@ -59,26 +59,13 @@ module Fluent
       desc 'Name of the node that this plugin should collect metrics from.'
       config_param :node_name, :string, default: nil
 
-      desc 'Name of the nodes that this plugin should collect metrics from.'
-      config_param :node_names, :array, default: [], value_type: :string
-
       desc 'The port that kubelet is listening to.'
-      config_param :kubelet_port, :integer, default: 10_255
-
-      desc 'Use the rest client to get the metrics from summary api on each kubelet'
-      config_param :use_rest_client, :bool, default: true
-
-      desc 'This option is used to get the metrics from summary api on each kubelet using ssl'
-      config_param :use_rest_client_ssl, :bool, default: false
+      config_param :kubelet_port, :integer, default: 10255
 
       def configure(conf)
         super
 
-        if @use_rest_client
-          raise Fluentd::ConfigError, 'node_name is required' if @node_name.nil? || @node_name.empty?
-        else
-          raise Fluentd::ConfigError, 'node_names array is required' if @node_names.nil? || @node_names.empty? || (@node_names.length <= 0)
-        end
+        raise Fluentd::ConfigError, 'node_name is required' if @node_name.nil? || @node_name.empty?
 
         parse_tag
         initialize_client
@@ -112,12 +99,12 @@ module Fluent
         current_context = config.context
 
         @client = Kubeclient::Client.new(
-          current_context.api_endpoint,
-          current_context.api_version,
-          options.merge(
-            ssl_options: current_context.ssl_options,
-            auth_options: current_context.auth_options
-          )
+            current_context.api_endpoint,
+            current_context.api_version,
+            options.merge(
+                ssl_options: current_context.ssl_options,
+                auth_options: current_context.auth_options
+            )
         )
       end
 
@@ -136,7 +123,7 @@ module Fluent
 
         # Use SSL certificate and bearer token from Kubernetes service account.
         if Dir.exist?(@secret_dir)
-          secret_ca_file = File.join(@secret_dir, 'ca.cert')
+          secret_ca_file = File.join(@secret_dir, 'ca.crt')
           secret_token_file = File.join(@secret_dir, 'token')
 
           if @ca_file.nil? && File.exist?(secret_ca_file)
@@ -145,23 +132,24 @@ module Fluent
 
           if @bearer_token_file.nil? && File.exist?(secret_token_file)
             @bearer_token_file = secret_token_file
+            log.debug {"Bearer token #{File.read(@bearer_token_file)}"}
           end
         end
 
         ssl_options = {
-          client_cert: @client_cert && OpenSSL::X509::Certificate.new(File.read(@client_cert)),
-          client_key:  @client_key && OpenSSL::PKey::RSA.new(File.read(@client_key)),
-          ca_file:     @ca_file,
-          verify_ssl:  @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
+            client_cert: @client_cert && OpenSSL::X509::Certificate.new(File.read(@client_cert)),
+            client_key: @client_key && OpenSSL::PKey::RSA.new(File.read(@client_key)),
+            ca_file: @ca_file,
+            verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
         }
 
         auth_options = {}
         auth_options[:bearer_token] = File.read(@bearer_token_file) if @bearer_token_file
 
         @client = Kubeclient::Client.new(
-          @kubernetes_url, 'v1',
-          ssl_options: ssl_options,
-          auth_options: auth_options
+            @kubernetes_url, 'v1',
+            ssl_options: ssl_options,
+            auth_options: auth_options
         )
 
         begin
@@ -172,72 +160,29 @@ module Fluent
       end
 
       def initialize_client
-        if @use_rest_client
-          initialize_rest_client
-        else
-          options = {
+        options = {
             timeouts: {
-              open: 10,
-              read: nil
+                open: 10,
+                read: nil
             }
-          }
+        }
 
-          if @kubeconfig.nil?
-            init_without_kubeconfig options
-          else
-            init_with_kubeconfig options
-          end
-        end
-      end
-
-      def initialize_rest_client
-        env_host = @node_name
-        env_port = @kubelet_port # 10255 is the readonly port of the kubelet from where we can fetch the metrics exposed by summary API
-
-        if env_host && env_port
-          if @use_rest_client_ssl == false
-            @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
-          else
-            @kubelet_url = "https://#{env_host}:10250/stats/summary"
-          end
-        end
-
-        log.info("Use URL #{@kubelet_url} for creating client to query kubelet summary api")
-      end
-
-      # This method is used to set the options for sending a request to the kubelet api
-      def request_options
-        options = { method: 'get', url: @kubelet_url }
-        if @use_rest_client_ssl == false
+        if @kubeconfig.nil?
+          init_without_kubeconfig options
         else
-          if Dir.exist?(@secret_dir)
-            secret_ca_file = File.join(@secret_dir, 'ca.cert')
-
-            if @ca_file.nil? && File.exist?(secret_ca_file)
-              @ca_file = secret_ca_file
-            end
-
-          end
-          ssl_options = {
-            client_cert: @client_cert && OpenSSL::X509::Certificate.new(File.read(@client_cert)),
-            client_key:  @client_key && OpenSSL::PKey::RSA.new(File.read(@client_key)),
-            ca_file:     @ca_file,
-            verify_ssl:  @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
-          }
-          options = options.merge(ssl_options)
+          init_with_kubeconfig options
         end
-        options
       end
 
       # @client.proxy_url only returns the url, but we need the resource, not just the url
       def summary_api(node)
         @summary_api =
-          begin
-            @client.discover unless @client.discovered
-            @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/stats/summary"].tap do |endpoint|
-              log.info("Use URL #{endpoint.url} for scraping metrics")
+            begin
+              @client.discover unless @client.discovered
+              @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/stats/summary"].tap do |endpoint|
+                log.info("Use URL #{endpoint.url} for scraping metrics")
+              end
             end
-          end
       end
 
       def parse_time(metric_time)
@@ -245,7 +190,7 @@ module Fluent
       end
 
       def underscore(camlcase)
-        camlcase.gsub(/[A-Z]/) { |c| "_#{c.downcase}" }
+        camlcase.gsub(/[A-Z]/) {|c| "_#{c.downcase}"}
       end
 
       def emit_uptime(tag:, start_time:, labels:)
@@ -306,7 +251,7 @@ module Fluent
 
       def emit_system_container_metrics(node_name, container)
         tag = 'sys-container'
-        labels = { 'node' => node_name, 'name' => container['name'] }
+        labels = {'node' => node_name, 'name' => container['name']}
         emit_uptime tag: tag, start_time: container['startTime'], labels: labels
         emit_cpu_metrics tag: tag, metrics: container['cpu'], labels: labels
         emit_memory_metrics tag: tag, metrics: container['memory'], labels: labels
@@ -315,7 +260,7 @@ module Fluent
       def emit_node_metrics(node)
         node_name = node['nodeName']
         tag = 'node'
-        labels = { 'node' => node_name }
+        labels = {'node' => node_name}
 
         unless node['startTime'].nil?
           emit_uptime tag: tag, start_time: node['startTime'], labels: labels
@@ -342,7 +287,7 @@ module Fluent
           node['systemContainers'].each do |c|
             emit_system_container_metrics node_name, c
           end
-          end
+        end
       end
 
       def emit_container_metrics(pod_labels, container)
@@ -379,15 +324,8 @@ module Fluent
       end
 
       def scrape_metrics
-        if @use_rest_client
-          response = RestClient::Request.execute request_options
-          handle_response(response)
-        else
-          @node_names.each do |node|
-            response = summary_api(node).get(@client.headers)
-            handle_response(response)
-          end
-        end
+        response = summary_api(@node_name).get(@client.headers)
+        handle_response(response)
       end
 
       # This method is used to handle responses from the kubelet summary api
