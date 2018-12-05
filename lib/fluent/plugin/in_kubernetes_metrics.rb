@@ -72,8 +72,6 @@ module Fluent
 
         if @use_rest_client
           raise Fluentd::ConfigError, 'node_name is required' if @node_name.nil? || @node_name.empty?
-        else
-          raise Fluentd::ConfigError, 'node_names array is required' if @node_names.nil? || @node_names.empty? || (@node_names.length <= 0)
         end
 
         parse_tag
@@ -84,6 +82,7 @@ module Fluent
         super
 
         timer_execute :metric_scraper, @interval, &method(:scrape_metrics)
+        timer_execute :cadvisor_metric_scraper, @interval, &method(:scrape_cadvisor_metrics)
       end
 
       def close
@@ -193,9 +192,11 @@ module Fluent
 
         if env_host && env_port
           @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
+          @cadvisor_url = "http://#{env_host}:#{env_port}/metrics/cadvisor"
         end
 
         log.info("Use URL #{@kubelet_url} for creating client to query kubelet summary api")
+        log.info("Use URL #{@cadvisor_url} for creating client to query cadvisor metrics api")
       end
 
       # This method is used to set the options for sending a request to the kubelet api
@@ -210,6 +211,16 @@ module Fluent
           begin
             @client.discover unless @client.discovered
             @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/stats/summary"].tap do |endpoint|
+              log.info("Use URL #{endpoint.url} for scraping metrics")
+            end
+          end
+      end
+
+      def cadvisor_proxy_api(node)
+        @summary_api =
+          begin
+            @client.discover unless @client.discovered
+            @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/metrics/cadvisor"].tap do |endpoint|
               log.info("Use URL #{endpoint.url} for scraping metrics")
             end
           end
@@ -376,6 +387,67 @@ module Fluent
         end
       rescue StandardError => error
         log.error "Failed to scrape metrics, error=#{error.inspect}"
+        log.error_backtrace
+      end
+
+      def cadvisor_request_options
+        options = { method: 'get', url: @cadvisor_url }
+        options
+      end
+
+      def emit_cadvisor_metrics(metrics)
+        metrics = metrics.split("\n")
+        for metric in metrics
+          if metric.include? "container_name="
+            if metric.match(/^((?!container_name="").)*$/) && metric[0] != '#'
+              metric_str, metric_val =  metric.split(" ")
+              first_occur = metric_str.index('{')
+              metric_name = metric_str[0..first_occur-1]
+              pod_name = metric.match(/pod_name="\S*"/).to_s
+              pod_name = pod_name.split('"')[1]
+              image_name = metric.match(/image="\S*"/).to_s
+              image_name = image_name.split('"')[1]
+              namespace = metric.match(/namespace="\S*"/).to_s
+              namespace = namespace.split('"')[1]
+              metric_labels = {'pod_name' => pod_name, 'image' => image_name, 'namespace' => namespace, 'value' => metric_val}
+                if metric.match(/^((?!container_name="POD").)*$/)
+                  tag = 'pod'
+                  tag = generate_tag("#{tag}#{metric_name.gsub('_', '.')}")
+                  tag = tag.gsub('container', '')
+                else
+                  container_name = metric.match(/container_name="\S*"/).to_s
+                  container_name = container_name.split('"')[1]
+                  container_label = {'container_name' => container_name}
+                  metric_labels.merge(container_label)
+                  tag = generate_tag("#{metric_name.gsub('_', '.')}")
+                end
+              router.emit tag, @scraped_at_cadvisor, metric_labels
+            end
+          end
+        end
+      end
+
+      def scrape_cadvisor_metrics
+        if @use_rest_client
+          response = RestClient::Request.execute cadvisor_request_options
+          handle_cadvisor_response(response)
+        else
+          response = cadvisor_proxy_api(@node_name).get(@client.headers)
+          handle_cadvisor_response(response)
+        end
+      end
+
+      # This method is used to handle responses from the kubelet summary api
+      def handle_cadvisor_response(response)
+        # Checking response codes only for a successful GET request viz., 2XX codes
+        if (response.code < 300) && (response.code > 199)
+          @scraped_at_cadvisor = Time.now
+          emit_cadvisor_metrics response.body
+        else
+          log.error "Expected 2xx from cadvisor metrics API, but got #{response.code}. Response body = #{response.body}"
+        end
+      rescue StandardError => e
+        log.error "Failed to scrape metrics, error=#{$ERROR_INFO}, #{e.inspect}"
         log.error_backtrace
       end
     end
