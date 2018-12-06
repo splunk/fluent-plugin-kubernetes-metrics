@@ -167,7 +167,5 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       events = d.events
       assert_not_nil events
     end
-
   end
-
 end
