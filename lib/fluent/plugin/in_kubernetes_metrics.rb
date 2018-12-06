@@ -82,7 +82,9 @@ module Fluent
         super
 
         timer_execute :metric_scraper, @interval, &method(:scrape_metrics)
+        timer_execute :stats_metric_scraper, @interval, &method(:scrape_stats_metrics)
         timer_execute :cadvisor_metric_scraper, @interval, &method(:scrape_cadvisor_metrics)
+
       end
 
       def close
@@ -192,16 +194,30 @@ module Fluent
 
         if env_host && env_port
           @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
+          @kubelet_url_stats = "http://#{env_host}:#{env_port}/stats/"
           @cadvisor_url = "http://#{env_host}:#{env_port}/metrics/cadvisor"
         end
 
         log.info("Use URL #{@kubelet_url} for creating client to query kubelet summary api")
+        log.info("Use URL #{@kubelet_url_stats} for creating client to query kubelet summary api")
         log.info("Use URL #{@cadvisor_url} for creating client to query cadvisor metrics api")
       end
 
       # This method is used to set the options for sending a request to the kubelet api
       def request_options
         options = { method: 'get', url: @kubelet_url }
+        options
+      end
+
+      # This method is used to set the options for sending a request to the stats api
+      def request_options_stats
+        options = { method: 'get', url: @kubelet_url_stats }
+        options
+      end
+
+      # This method is used to set the options for sending a request to the cadvisor api
+      def cadvisor_request_options
+        options = { method: 'get', url: @cadvisor_url }
         options
       end
 
@@ -216,8 +232,18 @@ module Fluent
           end
       end
 
+      def stats_api(node)
+        @stats_api =
+          begin
+            @client.discover unless @client.discovered
+            @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/stats/"].tap do |endpoint|
+              log.info("Use URL #{endpoint.url} for scraping stats metrics")
+            end
+          end
+      end
+
       def cadvisor_proxy_api(node)
-        @summary_api =
+        @cadvisor_api =
           begin
             @client.discover unless @client.discovered
             @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/metrics/cadvisor"].tap do |endpoint|
@@ -364,35 +390,9 @@ module Fluent
         Array(metrics['pods']).each &method(:emit_pod_metrics).curry.call(metrics['node']['nodeName']) unless metrics['pods'].nil?
       end
 
-      def scrape_metrics
-        if @use_rest_client
-          response = RestClient::Request.execute request_options
-          handle_response(response)
-        else
-          @node_names.each do |node|
-            response = summary_api(node).get(@client.headers)
-            handle_response(response)
-          end
-        end
-      end
-
-      # This method is used to handle responses from the kubelet summary api
-      def handle_response(response)
-        # Checking response codes only for a successful GET request viz., 2XX codes
-        if (response.code < 300) && (response.code > 199)
-          @scraped_at = Time.now
-          emit_metrics MultiJson.load(response.body)
-        else
-          log.error "ExMultiJson.load(response.body) expected 2xx from summary API, but got #{response.code}. Response body = #{response.body}"
-        end
-      rescue StandardError => error
-        log.error "Failed to scrape metrics, error=#{error.inspect}"
-        log.error_backtrace
-      end
-
-      def cadvisor_request_options
-        options = { method: 'get', url: @cadvisor_url }
-        options
+      def emit_stats_metrics(metrics)
+        #WIP - skeleton -> build out
+        puts metrics
       end
 
       def emit_cadvisor_metrics(metrics)
@@ -410,34 +410,86 @@ module Fluent
               namespace = metric.match(/namespace="\S*"/).to_s
               namespace = namespace.split('"')[1]
               metric_labels = {'pod_name' => pod_name, 'image' => image_name, 'namespace' => namespace, 'value' => metric_val}
-                if metric.match(/^((?!container_name="POD").)*$/)
-                  tag = 'pod'
-                  tag = generate_tag("#{tag}#{metric_name.gsub('_', '.')}")
-                  tag = tag.gsub('container', '')
-                else
-                  container_name = metric.match(/container_name="\S*"/).to_s
-                  container_name = container_name.split('"')[1]
-                  container_label = {'container_name' => container_name}
-                  metric_labels.merge(container_label)
-                  tag = generate_tag("#{metric_name.gsub('_', '.')}")
-                end
+              if metric.match(/^((?!container_name="POD").)*$/)
+                tag = 'pod'
+                tag = generate_tag("#{tag}#{metric_name.gsub('_', '.')}")
+                tag = tag.gsub('container', '')
+              else
+                container_name = metric.match(/container_name="\S*"/).to_s
+                container_name = container_name.split('"')[1]
+                container_label = {'container_name' => container_name}
+                metric_labels.merge(container_label)
+                tag = generate_tag("#{metric_name.gsub('_', '.')}")
+              end
               router.emit tag, @scraped_at_cadvisor, metric_labels
             end
           end
         end
       end
 
+      def scrape_metrics
+        if @use_rest_client
+          response = RestClient::Request.execute request_options
+          handle_response(response)
+        else
+          @node_names.each do |node|
+            response = summary_api(node).get(@client.headers)
+            handle_response(response)
+          end
+        end
+      end
+
+      def scrape_stats_metrics
+        if @use_rest_client
+          response_stats = RestClient::Request.execute request_options_stats
+          handle_stats_response(response_stats)
+        else
+          @node_names.each do |node|
+            response_stats = summary_api(node).get(@client.headers)
+            handle_stats_response(response_stats)
+          end
+        end
+      end
+
       def scrape_cadvisor_metrics
         if @use_rest_client
-          response = RestClient::Request.execute cadvisor_request_options
-          handle_cadvisor_response(response)
+          response_cadvisor = RestClient::Request.execute cadvisor_request_options
+          handle_cadvisor_response(response_cadvisor)
         else
-          response = cadvisor_proxy_api(@node_name).get(@client.headers)
-          handle_cadvisor_response(response)
+          response_cadvisor = cadvisor_proxy_api(@node_name).get(@client.headers)
+          handle_cadvisor_response(response_cadvisor)
         end
       end
 
       # This method is used to handle responses from the kubelet summary api
+      def handle_response(response)
+        # Checking response codes only for a successful GET request viz., 2XX codes
+        if (response.code < 300) && (response.code > 199)
+          @scraped_at = Time.now
+          emit_metrics MultiJson.load(response.body)
+        else
+          log.error "ExMultiJson.load(response.body) expected 2xx from summary API, but got #{response.code}. Response body = #{response.body}"
+        end
+      rescue StandardError => error
+        log.error "Failed to scrape metrics, error=#{error.inspect}"
+        log.error_backtrace
+      end
+
+      # This method is used to handle responses from the kubelet stats api
+      def handle_stats_response(response)
+        # Checking response codes only for a successful GET request viz., 2XX codes
+        if (response.code < 300) && (response.code > 199)
+          @scraped_at = Time.now
+          emit_stats_metrics MultiJson.load(response.body)
+        else
+          log.error "ExMultiJson.load(response.body) expected 2xx from stats API, but got #{response.code}. Response body = #{response.body}"
+        end
+      rescue StandardError => error
+        log.error "Failed to scrape metrics, error=#{error.inspect}"
+        log.error_backtrace
+      end
+
+      # This method is used to handle responses from the cadvisor  api
       def handle_cadvisor_response(response)
         # Checking response codes only for a successful GET request viz., 2XX codes
         if (response.code < 300) && (response.code > 199)
