@@ -23,7 +23,7 @@ module PluginTestHelper
   def k8s_url(path='api') "https://#{k8s_host}:#{k8s_port}/#{path}" end
   def kubelet_summary_api_url() "http://generics-aws-node-name:10255/stats/summary" end
   def kubelet_stats_api_url() "http://generics-aws-node-name:10255/stats/" end
-  def kubelet_cadvisor_api_url() "http://generics-aws-node-name:10255/cadvisor/metrics" end
+  def kubelet_cadvisor_api_url() "http://generics-aws-node-name:10255/metrics/cadvisor" end
 
   def stub_k8s_requests
     ENV['KUBERNETES_SERVICE_HOST'] = k8s_host
@@ -35,6 +35,7 @@ module PluginTestHelper
     stub_k8s_proxy_summary_api
     stub_metrics_cadvisor
     stub_metrics_stats
+    stub_k8s_proxy_cadvisor_api
   end
 
   def stub_k8s_proxy_summary_api
@@ -71,6 +72,13 @@ module PluginTestHelper
         .to_return(body: f.read())
     }.close
   end
+
+  def stub_k8s_proxy_cadvisor_api
+  open(File.expand_path('../metrics_cadvisor.txt', __FILE__)).tap { |f|
+    stub_request(:get, "#{k8s_url}/v1/nodes/generics-aws-node-name:10255/proxy/metrics/cadvisor")
+        .to_return(body: f.read)
+  }.close
+end
 
   def stub_metrics_stats
     open(File.expand_path('../stats.json', __FILE__)).tap { |f|

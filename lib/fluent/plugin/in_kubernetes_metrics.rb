@@ -324,6 +324,37 @@ module Fluent
         emit_memory_metrics tag: tag, metrics: container['memory'], labels: labels
       end
 
+      def emit_stats_breakdown(stats)
+        #puts stats['cpu']
+        unless stats['cpu'].nil?
+
+
+        end
+
+        unless stats['diskio'].nil?
+
+        end
+
+        unless stats['memory'].nil?
+
+        end
+
+        unless stats['network'].nil?
+
+        end
+
+        unless stats['filesystem'].nil?
+
+        end
+
+        unless stats['task_stats'].nil?
+
+        end
+
+
+      end
+
+
       def emit_node_metrics(node)
         node_name = node['nodeName']
         tag = 'node'
@@ -391,12 +422,7 @@ module Fluent
       end
 
       def emit_stats_metrics(metrics)
-        #WIP - skeleton -> build out
-        #
-        #
-        #
-        #
-        puts metrics
+        emit_stats_breakdown(metrics['stats']) unless metrics['stats'].nil?
       end
 
       def emit_cadvisor_metrics(metrics)
@@ -460,8 +486,10 @@ module Fluent
           response_cadvisor = RestClient::Request.execute cadvisor_request_options
           handle_cadvisor_response(response_cadvisor)
         else
-          response_cadvisor = cadvisor_proxy_api(@node_name).get(@client.headers)
-          handle_cadvisor_response(response_cadvisor)
+          @node_names.each do |node|
+            response_cadvisor = cadvisor_proxy_api(node).get(@client.headers)
+            handle_cadvisor_response(response_cadvisor)
+          end
         end
       end
 
