@@ -33,6 +33,8 @@ module PluginTestHelper
     stub_k8s_v1
     stub_kubelet_summary_api
     stub_k8s_proxy_summary_api
+    stub_metrics_cadvisor
+    stub_metrics_stats
   end
 
   def stub_k8s_proxy_summary_api
@@ -64,7 +66,7 @@ module PluginTestHelper
   end
 
   def stub_metrics_cadvisor
-    open(File.expand_path('../metrics_cadvisor.json', __FILE__)).tap { |f|
+    open(File.expand_path('../metrics_cadvisor.txt', __FILE__)).tap { |f|
       stub_request(:get, "#{kubelet_cadvisor_api_url}")
         .to_return(body: f.read())
     }.close

@@ -392,6 +392,10 @@ module Fluent
 
       def emit_stats_metrics(metrics)
         #WIP - skeleton -> build out
+        #
+        #
+        #
+        #
         puts metrics
       end
 
