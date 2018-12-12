@@ -30,7 +30,8 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
   setup do
     Fluent::Test.setup
 
-    @@parsed_string = JSON.parse(get_parsed_string)
+    @@parsed_unit_string = JSON.parse(get_unit_parsed_string)
+    @@parsed_string2 = JSON.parse(get_stats_parsed_string)
 
     stub_k8s_requests
 
@@ -67,10 +68,10 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       puts 'Test: test_emit_cpu_metrics'
 
       assert_not_nil @@hash_map_test.find('kube.node.cpu.usage')
-      assert_equal @@parsed_string['node']['cpu']['usageNanoCores'], @@hash_map_test['kube.node.cpu.usage'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['cpu']['usageNanoCores'], @@hash_map_test['kube.node.cpu.usage'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.cpu.usage_rate')
-      assert_equal @@parsed_string['node']['cpu']['usageNanoCores']/ 1_000_000, @@hash_map_test['kube.node.cpu.usage_rate'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['cpu']['usageNanoCores']/ 1_000_000, @@hash_map_test['kube.node.cpu.usage_rate'][2]["value"]
 
     end
 
@@ -78,22 +79,22 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       puts 'Test: test_emit_memory_metrics'
 
       assert_not_nil @@hash_map_test.find('kube.node.memory.available_bytes')
-      assert_equal @@parsed_string['node']['memory']['availableBytes'], @@hash_map_test['kube.node.memory.available_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['memory']['availableBytes'], @@hash_map_test['kube.node.memory.available_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.memory.usage_bytes')
-      assert_equal @@parsed_string['node']['memory']['usageBytes'], @@hash_map_test['kube.node.memory.usage_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['memory']['usageBytes'], @@hash_map_test['kube.node.memory.usage_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.memory.working_set_bytes')
-      assert_equal @@parsed_string['node']['memory']['workingSetBytes'], @@hash_map_test['kube.node.memory.working_set_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['memory']['workingSetBytes'], @@hash_map_test['kube.node.memory.working_set_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.memory.rss_bytes')
-      assert_equal @@parsed_string['node']['memory']['rssBytes'], @@hash_map_test['kube.node.memory.rss_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['memory']['rssBytes'], @@hash_map_test['kube.node.memory.rss_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.memory.page_faults')
-      assert_equal @@parsed_string['node']['memory']['pageFaults'], @@hash_map_test['kube.node.memory.page_faults'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['memory']['pageFaults'], @@hash_map_test['kube.node.memory.page_faults'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.memory.major_page_faults')
-      assert_equal @@parsed_string['node']['memory']['majorPageFaults'], @@hash_map_test['kube.node.memory.major_page_faults'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['memory']['majorPageFaults'], @@hash_map_test['kube.node.memory.major_page_faults'][2]["value"]
 
     end
 
@@ -101,16 +102,16 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       puts 'Test: test_emit_network_metrics'
 
       assert_not_nil @@hash_map_test.find('kube.node.network.rx_bytes')
-      assert_equal @@parsed_string['node']['network']['rxBytes'], @@hash_map_test['kube.node.network.rx_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['network']['rxBytes'], @@hash_map_test['kube.node.network.rx_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.network.rx_errors')
-      assert_equal @@parsed_string['node']['network']['rxErrors'], @@hash_map_test['kube.node.network.rx_errors'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['network']['rxErrors'], @@hash_map_test['kube.node.network.rx_errors'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.network.tx_bytes')
-      assert_equal @@parsed_string['node']['network']['txBytes'], @@hash_map_test['kube.node.network.tx_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['network']['txBytes'], @@hash_map_test['kube.node.network.tx_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.network.tx_errors')
-      assert_equal @@parsed_string['node']['network']['txErrors'], @@hash_map_test['kube.node.network.tx_errors'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['network']['txErrors'], @@hash_map_test['kube.node.network.tx_errors'][2]["value"]
 
     end
 
@@ -118,22 +119,22 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       puts 'Test: test_emit_fs_metrics'
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.available_bytes')
-      assert_equal @@parsed_string['node']['fs']['availableBytes'], @@hash_map_test['kube.node.fs.available_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['fs']['availableBytes'], @@hash_map_test['kube.node.fs.available_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.capacity_bytes')
-      assert_equal @@parsed_string['node']['fs']['capacityBytes'], @@hash_map_test['kube.node.fs.capacity_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['fs']['capacityBytes'], @@hash_map_test['kube.node.fs.capacity_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.used_bytes')
-      assert_equal @@parsed_string['node']['fs']['usedBytes'], @@hash_map_test['kube.node.fs.used_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['fs']['usedBytes'], @@hash_map_test['kube.node.fs.used_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.inodes_free')
-      assert_equal @@parsed_string['node']['fs']['inodesFree'], @@hash_map_test['kube.node.fs.inodes_free'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['fs']['inodesFree'], @@hash_map_test['kube.node.fs.inodes_free'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.inodes')
-      assert_equal @@parsed_string['node']['fs']['inodes'], @@hash_map_test['kube.node.fs.inodes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['fs']['inodes'], @@hash_map_test['kube.node.fs.inodes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.inodes_used')
-      assert_equal @@parsed_string['node']['fs']['inodesUsed'], @@hash_map_test['kube.node.fs.inodes_used'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['fs']['inodesUsed'], @@hash_map_test['kube.node.fs.inodes_used'][2]["value"]
 
     end
 
@@ -141,22 +142,22 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       puts 'Test: test_emit_fs_imagefs_metrics'
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.available_bytes')
-      assert_equal @@parsed_string['node']['runtime']['imageFs']['availableBytes'], @@hash_map_test['kube.node.imagefs.available_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['runtime']['imageFs']['availableBytes'], @@hash_map_test['kube.node.imagefs.available_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.capacity_bytes')
-      assert_equal @@parsed_string['node']['runtime']['imageFs']['capacityBytes'], @@hash_map_test['kube.node.imagefs.capacity_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['runtime']['imageFs']['capacityBytes'], @@hash_map_test['kube.node.imagefs.capacity_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.used_bytes')
-      assert_equal @@parsed_string['node']['runtime']['imageFs']['usedBytes'], @@hash_map_test['kube.node.imagefs.used_bytes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['runtime']['imageFs']['usedBytes'], @@hash_map_test['kube.node.imagefs.used_bytes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.inodes_free')
-      assert_equal @@parsed_string['node']['runtime']['imageFs']['inodesFree'], @@hash_map_test['kube.node.imagefs.inodes_free'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['runtime']['imageFs']['inodesFree'], @@hash_map_test['kube.node.imagefs.inodes_free'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.inodes')
-      assert_equal @@parsed_string['node']['runtime']['imageFs']['inodes'], @@hash_map_test['kube.node.imagefs.inodes'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['runtime']['imageFs']['inodes'], @@hash_map_test['kube.node.imagefs.inodes'][2]["value"]
 
       assert_not_nil @@hash_map_test.find('kube.node.fs.inodes_used')
-      assert_equal @@parsed_string['node']['runtime']['imageFs']['inodesUsed'], @@hash_map_test['kube.node.imagefs.inodes_used'][2]["value"]
+      assert_equal @@parsed_unit_string['node']['runtime']['imageFs']['inodesUsed'], @@hash_map_test['kube.node.imagefs.inodes_used'][2]["value"]
 
     end
 
@@ -167,5 +168,25 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       events = d.events
       assert_not_nil events
     end
+
   end
+
+  sub_test_case "node_stats_tests" do
+
+    test 'test_stats_cpu_usage' do
+      puts 'Test: test_stats_cpu_usage'
+
+      # assert_not_nil @@hash_map_test.find('kube.container.cpu.usage')
+      # assert_equal @@parsed_string2["stats"][0]["cpu"]["usage"]["total"], @@hash_map_test['kube.container.cpu.usage'][2]["value"]
+
+      puts @@parsed_string2["stats"][0]["cpu"]["usage"]["total"].inspect
+
+      # puts @@hash_map_test['kube.container.cpu.usage'][2]["value"].inspect
+
+    end
+
+  end
+
+  # end
+
 end

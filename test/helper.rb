@@ -87,11 +87,20 @@ end
     }.close
   end
 
-  def get_parsed_string
+  def get_unit_parsed_string
     parsed_string = nil
     open(File.expand_path('../unit.json', __FILE__)).tap { |f|
       parsed_string = f.read()
     }.close
     parsed_string
   end
+
+  def get_stats_parsed_string
+    get_stats_parsed_string = nil
+    open(File.expand_path('../stats.json', __FILE__)).tap { |f|
+      get_stats_parsed_string = f.read()
+    }.close
+    get_stats_parsed_string
+  end
+
 end
