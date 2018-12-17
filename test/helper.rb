@@ -34,8 +34,9 @@ module PluginTestHelper
     stub_kubelet_summary_api
     stub_k8s_proxy_summary_api
     stub_metrics_cadvisor
-    stub_metrics_stats
     stub_k8s_proxy_cadvisor_api
+    stub_metrics_stats
+    stub_metrics_proxy_stats
   end
 
   def stub_k8s_proxy_summary_api
@@ -78,7 +79,7 @@ module PluginTestHelper
     stub_request(:get, "#{k8s_url}/v1/nodes/generics-aws-node-name:10255/proxy/metrics/cadvisor")
         .to_return(body: f.read)
   }.close
-end
+  end
 
   def stub_metrics_stats
     open(File.expand_path('../stats.json', __FILE__)).tap { |f|
@@ -87,11 +88,26 @@ end
     }.close
   end
 
-  def get_parsed_string
+  def stub_metrics_proxy_stats
+    open(File.expand_path('../stats.json', __FILE__)).tap { |f|
+      stub_request(:get, "#{k8s_url}/v1/nodes/generics-aws-node-name:10255/proxy/stats/")
+          .to_return(body: f.read)
+    }.close
+  end
+
+  def get_unit_parsed_string
     parsed_string = nil
     open(File.expand_path('../unit.json', __FILE__)).tap { |f|
       parsed_string = f.read()
     }.close
     parsed_string
+  end
+
+  def get_stats_parsed_string
+    get_stats_parsed_string = nil
+    open(File.expand_path('../stats.json', __FILE__)).tap { |f|
+      get_stats_parsed_string = f.read()
+    }.close
+    get_stats_parsed_string
   end
 end
