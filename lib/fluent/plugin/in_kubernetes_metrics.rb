@@ -325,9 +325,8 @@ module Fluent
 
       def emit_stats_breakdown(stats)
         stats_latest =  stats[-1]
-        tag = 'stats'
-        stats_timestamp = stats_latest['timestamp']
-        labels = { 'stats' => 'stats' }
+        tag = 'node'
+        stats_timestamp = parse_time stats_latest['timestamp']
         unless stats_latest['cpu'].nil?
           emit_cpu_metrics_stats tag: tag, metrics: stats_latest['cpu'], labels: labels, time: stats_timestamp
         end
@@ -450,7 +449,7 @@ module Fluent
           type = file_system['type']
           file_system.each do | file_metric |
             file_key , file_value = file_metric
-            router.emit generate_tag("#{tag}.filesystem.".concat(".").concat(file_key)), time, labels.merge('device' => device, 'type' => type, 'value' => file_value)
+            router.emit generate_tag("#{tag}.filesystem.".concat(file_key)), time, labels.merge('device' => device, 'type' => type, 'value' => file_value)
           end
         end
       end
