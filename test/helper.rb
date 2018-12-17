@@ -34,8 +34,9 @@ module PluginTestHelper
     stub_kubelet_summary_api
     stub_k8s_proxy_summary_api
     stub_metrics_cadvisor
-    stub_metrics_stats
     stub_k8s_proxy_cadvisor_api
+    stub_metrics_stats
+    stub_metrics_proxy_stats
   end
 
   def stub_k8s_proxy_summary_api
@@ -78,12 +79,19 @@ module PluginTestHelper
     stub_request(:get, "#{k8s_url}/v1/nodes/generics-aws-node-name:10255/proxy/metrics/cadvisor")
         .to_return(body: f.read)
   }.close
-end
+  end
 
   def stub_metrics_stats
     open(File.expand_path('../stats.json', __FILE__)).tap { |f|
       stub_request(:get, "#{kubelet_stats_api_url}")
           .to_return(body: f.read())
+    }.close
+  end
+
+  def stub_metrics_proxy_stats
+    open(File.expand_path('../stats.json', __FILE__)).tap { |f|
+      stub_request(:get, "#{k8s_url}/v1/nodes/generics-aws-node-name:10255/proxy/stats/")
+          .to_return(body: f.read)
     }.close
   end
 
@@ -102,5 +110,4 @@ end
     }.close
     get_stats_parsed_string
   end
-
 end

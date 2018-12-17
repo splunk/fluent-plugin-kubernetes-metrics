@@ -199,7 +199,7 @@ module Fluent
         end
 
         log.info("Use URL #{@kubelet_url} for creating client to query kubelet summary api")
-        log.info("Use URL #{@kubelet_url_stats} for creating client to query kubelet summary api")
+        log.info("Use URL #{@kubelet_url_stats} for creating client to query kubelet stats api")
         log.info("Use URL #{@cadvisor_url} for creating client to query cadvisor metrics api")
       end
 
@@ -325,35 +325,143 @@ module Fluent
       end
 
       def emit_stats_breakdown(stats)
-        #puts stats['cpu']
-        unless stats['cpu'].nil?
-
-
+        stats_latest =  stats[-1]
+        tag = 'stats'
+        stats_timestamp = stats_latest['timestamp']
+        labels = { 'stats' => 'stats' }
+        unless stats_latest['cpu'].nil?
+          emit_cpu_metrics_stats tag: tag, metrics: stats_latest['cpu'], labels: labels, time: stats_timestamp
         end
 
-        unless stats['diskio'].nil?
-
+        unless stats_latest['diskio'].nil?
+          emit_diskio_metrics_stats tag: tag, metrics: stats_latest['diskio'], labels: labels, time: stats_timestamp
         end
 
-        unless stats['memory'].nil?
-
+        unless stats_latest['memory'].nil?
+          emit_memory_metrics_stats tag: tag, metrics: stats_latest['memory'], labels: labels, time: stats_timestamp
         end
 
-        unless stats['network'].nil?
-
+        unless stats_latest['network'].nil?
+          emit_network_metrics_stats tag: tag, metrics: stats_latest['network'], labels: labels, time: stats_timestamp
         end
 
-        unless stats['filesystem'].nil?
-
+        unless stats_latest['filesystem'].nil?
+          emit_filesystem_metrics_stats tag: tag, metrics: stats_latest['filesystem'], labels: labels, time: stats_timestamp
         end
 
-        unless stats['task_stats'].nil?
-
+        unless stats_latest['task_stats'].nil?
+          emit_tasks_stats_metrics_stats tag: tag, metrics: stats_latest['task_stats'], labels: labels, time: stats_timestamp
         end
-
-
       end
 
+      def emit_cpu_metrics_stats(tag:, metrics:, labels:, time:)
+        if cpu_usage_total = metrics['usage']['total']
+          router.emit generate_tag("#{tag}.cpu.usage.total"), time, labels.merge('value' => cpu_usage_total / 1_000_000)
+        end
+        if cpu_usage_user = metrics['usage']['user']
+          router.emit generate_tag("#{tag}.cpu.usage.user"), time, labels.merge('value' => cpu_usage_user / 1_000_000)
+        end
+        if cpu_usage_system = metrics['usage']['system']
+          router.emit generate_tag("#{tag}.cpu.usage.system"), time, labels.merge('value' => cpu_usage_system / 1_000_000)
+        end
+
+        if cpu_cfs_periods = metrics['cfs']['periods']
+          router.emit generate_tag("#{tag}.cpu.cfs.periods"), time, labels.merge('value' => cpu_cfs_periods)
+        end
+        if cpu_cfs_throttled_periods = metrics['cfs']['throttled_periods']
+          router.emit generate_tag("#{tag}.cpu.cfs.throttled_periods"), time, labels.merge('value' => cpu_cfs_throttled_periods)
+        end
+        if cpu_cfs_throttled_time = metrics['cfs']['throttled_time']
+          router.emit generate_tag("#{tag}.cpu.cfs.throttled_time"), time, labels.merge('value' => cpu_cfs_throttled_time)
+        end
+        if cpu_load_average  = metrics['load_average']
+          router.emit generate_tag("#{tag}.cpu.load_average"), time, labels.merge('value' => cpu_load_average)
+        end
+      end
+
+      def emit_diskio_metrics_stats(tag:, metrics:, labels:, time:)
+        %w[io_service_bytes io_serviced].each do |metric_name|
+          if current_io_metric = metrics[metric_name]
+            current_io_metric.each do |device|
+            if diskio_io_service_bytes_major =  device['major']
+               router.emit generate_tag("#{tag}.diskio".concat(metric_name).concat("major")), time, labels.merge('device' => device['device'], 'value' => diskio_io_service_bytes_major)
+            end
+            if diskio_io_service_bytes_minor =  device['minor']
+               router.emit generate_tag("#{tag}.diskio".concat(metric_name).concat("minor")), time, labels.merge('device' => device['device'], 'value' => diskio_io_service_bytes_minor)
+            end
+            device_stats = device['stats']
+            device_stats.each do | device_stat |
+              device_key, device_value = device_stat
+              router.emit generate_tag("#{tag}.diskio.".concat(metric_name).concat(".stats.").concat(device_key)), time, labels.merge('device' => device['device'], 'value' => device_value)
+            end
+           end
+          end
+        end
+      end
+
+      def emit_memory_metrics_stats(tag:, metrics:, labels:, time:)
+        %w[usage max_usage cache rss swap working_set failcnt].each do | metric_name |
+          if current_memory_metric  = metrics[metric_name]
+            router.emit generate_tag("#{tag}.memory.".concat(metric_name)), time, labels.merge('value' => current_memory_metric)
+          end
+
+        end
+        %w[container_data hierarchical_data ].each do | metric_name_group |
+          if current_memory_metric_group = metrics[metric_name_group]
+            current_memory_metric_group.each do | metric_name |
+              metric_key, metric_value =  metric_name
+              router.emit generate_tag("#{tag}.memory.".concat(metric_name_group).concat(".").concat(metric_key)), time, labels.merge('value' => metric_value)
+            end
+          end
+        end
+      end
+
+      def emit_network_metrics_stats(tag:, metrics:, labels:, time:)
+        network_name = metrics['name']
+        %w[rx_bytes rx_packets rx_errors rx_dropped tx_bytes tx_packets tx_errors tx_dropped].each do | metric_name |
+          if current_network_metric = metrics[metric_name]
+            router.emit generate_tag("#{tag}.network.".concat(network_name).concat(".").concat(metric_name)), time, labels.merge('value' => current_network_metric)
+          end
+        end
+
+        if network_interfaces = metrics['interfaces']
+          network_interfaces.each do | current_interface |
+            name = current_interface['name']
+            %w[rx_bytes rx_packets rx_errors rx_dropped tx_bytes tx_packets tx_errors tx_dropped].each do | current_metric|
+              if metric_value = current_interface[current_metric]
+                router.emit generate_tag("#{tag}.network.".concat(name).concat(".").concat(current_metric)), time, labels.merge('value' => metric_value)
+              end
+            end
+          end
+        end
+
+        %w[tcp tcp6 udp udp6].each do | metric_name_group |
+          if metric_group = metrics[metric_name_group]
+            metric_group.each do |current_metric|
+              metric_key, metric_value = current_metric
+              router.emit generate_tag("#{tag}.network.".concat(metric_name_group).concat(".").concat(metric_key)), time, labels.merge('value' => metric_value)
+            end
+          end
+        end
+      end
+
+      def emit_filesystem_metrics_stats(tag:, metrics:, labels:, time:)
+        metrics.each do | file_system |
+          device = file_system['device']
+          type = file_system['type']
+          file_system.each do | file_metric |
+            file_key , file_value = file_metric
+            router.emit generate_tag("#{tag}.filesystem.".concat(".").concat(file_key)), time, labels.merge('device' => device, 'type' => type, 'value' => file_value)
+          end
+        end
+      end
+
+      def emit_tasks_stats_metrics_stats(tag:, metrics:, labels:, time:)
+        metrics.each do | task_stats |
+          task_key, task_value = task_stats
+          router.emit generate_tag("#{tag}.tasks_stats.".concat(task_key)), time, labels.merge('value' => task_value)
+        end
+      end
 
       def emit_node_metrics(node)
         node_name = node['nodeName']
@@ -385,7 +493,7 @@ module Fluent
           node['systemContainers'].each do |c|
             emit_system_container_metrics node_name, c
           end
-          end
+        end
       end
 
       def emit_container_metrics(pod_labels, container)
@@ -475,7 +583,7 @@ module Fluent
           handle_stats_response(response_stats)
         else
           @node_names.each do |node|
-            response_stats = summary_api(node).get(@client.headers)
+            response_stats = stats_api(node).get(@client.headers)
             handle_stats_response(response_stats)
           end
         end
