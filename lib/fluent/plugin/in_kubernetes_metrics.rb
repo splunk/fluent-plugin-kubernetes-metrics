@@ -84,7 +84,6 @@ module Fluent
         timer_execute :metric_scraper, @interval, &method(:scrape_metrics)
         timer_execute :stats_metric_scraper, @interval, &method(:scrape_stats_metrics)
         timer_execute :cadvisor_metric_scraper, @interval, &method(:scrape_cadvisor_metrics)
-
       end
 
       def close
