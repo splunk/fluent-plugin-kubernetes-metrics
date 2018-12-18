@@ -326,6 +326,7 @@ module Fluent
       def emit_stats_breakdown(stats)
         stats_latest =  stats[-1]
         tag = 'node'
+        labels = { 'node' => @node_name }
         stats_timestamp = parse_time stats_latest['timestamp']
         unless stats_latest['cpu'].nil?
           emit_cpu_metrics_stats tag: tag, metrics: stats_latest['cpu'], labels: labels, time: stats_timestamp
@@ -581,6 +582,7 @@ module Fluent
           handle_stats_response(response_stats)
         else
           @node_names.each do |node|
+            @node_name = node
             response_stats = stats_api(node).get(@client.headers)
             handle_stats_response(response_stats)
           end
