@@ -72,6 +72,8 @@ module Fluent
 
         if @use_rest_client
           raise Fluentd::ConfigError, 'node_name is required' if @node_name.nil? || @node_name.empty?
+        else
+          raise Fluentd::ConfigError, 'node_names is required' if @node_names.nil? || @node_names.empty?
         end
 
         parse_tag
@@ -221,7 +223,7 @@ module Fluent
       end
 
       # @client.proxy_url only returns the url, but we need the resource, not just the url
-      def summary_api(node)
+      def summary_proxy_api(node)
         @summary_api =
           begin
             @client.discover unless @client.discovered
@@ -231,7 +233,7 @@ module Fluent
           end
       end
 
-      def stats_api(node)
+      def stats_proxy_api(node)
         @stats_api =
           begin
             @client.discover unless @client.discovered
@@ -570,7 +572,7 @@ module Fluent
           handle_response(response)
         else
           @node_names.each do |node|
-            response = summary_api(node).get(@client.headers)
+            response = summary_proxy_api(node).get(@client.headers)
             handle_response(response)
           end
         end
@@ -583,7 +585,7 @@ module Fluent
         else
           @node_names.each do |node|
             @node_name = node
-            response_stats = stats_api(node).get(@client.headers)
+            response_stats = stats_proxy_api(node).get(@client.headers)
             handle_stats_response(response_stats)
           end
         end
