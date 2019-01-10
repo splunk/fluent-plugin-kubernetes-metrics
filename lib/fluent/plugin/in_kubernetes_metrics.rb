@@ -44,13 +44,16 @@ module Fluent
       config_param :client_key, :string, default: nil
 
       desc 'Path to the CA file.'
-      config_param :ca_file, :string, default: nil
+      config_param :ca_file, :string, default: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
 
       desc "If `insecure_ssl` is set to `true`, it won't verify apiserver's certificate."
       config_param :insecure_ssl, :bool, default: false
 
       desc 'Path to the file contains the API token. By default it reads from the file "token" in the `secret_dir`.'
       config_param :bearer_token_file, :string, default: nil
+
+      desc 'Bearer token for the service account to be used for pulling metrics.'
+      config_param :bearer_token, :string, default: nil
 
       desc "Path of the location where pod's service account's credentials are stored."
       config_param :secret_dir, :string, default: '/var/run/secrets/kubernetes.io/serviceaccount'
@@ -66,6 +69,9 @@ module Fluent
 
       desc 'Use the rest client to get the metrics from summary api on each kubelet'
       config_param :use_rest_client, :bool, default: true
+
+      desc 'This option is used to get the metrics from summary api on each kubelet using ssl'
+      config_param :use_rest_client_ssl, :bool, default: true
 
       def configure(conf)
         super
@@ -190,11 +196,31 @@ module Fluent
       def initialize_rest_client
         env_host = @node_name
         env_port = 10_255 # 10255 is the readonly port of the kubelet from where we can fetch the metrics exposed by summary API
+        ssl_env_port = 10_250 # 10250 is the default ssl port of the kubelet from where we can fetch the metrics exposed by summary API
 
         if env_host && env_port
-          @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
-          @kubelet_url_stats = "http://#{env_host}:#{env_port}/stats/"
-          @cadvisor_url = "http://#{env_host}:#{env_port}/metrics/cadvisor"
+          if @use_rest_client_ssl == false
+            @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
+            @kubelet_url_stats = "http://#{env_host}:#{env_port}/stats/"
+            @cadvisor_url = "http://#{env_host}:#{env_port}/metrics/cadvisor"
+          else
+            @kubelet_url = "https://#{env_host}:#{ssl_env_port}/stats/summary"
+            @kubelet_url_stats = "https://#{env_host}:#{ssl_env_port}/stats/"
+            @cadvisor_url = "https://#{env_host}:#{ssl_env_port}/metrics/cadvisor"
+          end
+        end
+
+        if Dir.exist?(@secret_dir)
+          secret_ca_file = File.join(@secret_dir, 'ca.crt')
+          secret_token_file = File.join(@secret_dir, 'token')
+
+          if @ca_file.nil? && File.exist?(secret_ca_file)
+            @ca_file = secret_ca_file
+          end
+          if @bearer_token_file.nil? and File.exist?(secret_token_file)
+            @bearer_token_file = secret_token_file
+          end
+
         end
 
         log.info("Use URL #{@kubelet_url} for creating client to query kubelet summary api")
@@ -205,18 +231,57 @@ module Fluent
       # This method is used to set the options for sending a request to the kubelet api
       def request_options
         options = { method: 'get', url: @kubelet_url }
+
+        if @use_rest_client_ssl == true
+
+          ssl_options = {
+              ssl_ca_file: @ca_file,
+              verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER,
+              headers: {:Authorization => 'Bearer ' + File.read(@bearer_token_file)}
+          }
+
+          options = options.merge(ssl_options)
+          log.debug "request_options - #{options}"
+        end
+
         options
       end
 
       # This method is used to set the options for sending a request to the stats api
       def request_options_stats
         options = { method: 'get', url: @kubelet_url_stats }
+
+        if @use_rest_client_ssl == true
+
+          ssl_options = {
+              ssl_ca_file: @ca_file,
+              verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER,
+              headers: {:Authorization => 'Bearer ' + File.read(@bearer_token_file)}
+          }
+
+          options = options.merge(ssl_options)
+          log.debug "request_options_stats - #{options}"
+        end
+
         options
       end
 
       # This method is used to set the options for sending a request to the cadvisor api
       def cadvisor_request_options
         options = { method: 'get', url: @cadvisor_url }
+
+        if @use_rest_client_ssl == true
+
+          ssl_options = {
+              ssl_ca_file: @ca_file,
+              verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER,
+              headers: {:Authorization => 'Bearer ' + File.read(@bearer_token_file)}
+          }
+
+          options = options.merge(ssl_options)
+          log.debug "cadvisor_request_options - #{options}"
+        end
+
         options
       end
 
