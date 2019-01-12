@@ -195,14 +195,14 @@ module Fluent
         env_port = @kubelet_port
 
         if env_host && env_port
-          if @use_rest_client_ssl == false
-            @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
-            @kubelet_url_stats = "http://#{env_host}:#{env_port}/stats/"
-            @cadvisor_url = "http://#{env_host}:#{env_port}/metrics/cadvisor"
-          else
+          if @use_rest_client_ssl
             @kubelet_url = "https://#{env_host}:#{env_port}/stats/summary"
             @kubelet_url_stats = "https://#{env_host}:#{env_port}/stats/"
             @cadvisor_url = "https://#{env_host}:#{env_port}/metrics/cadvisor"
+          else
+            @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
+            @kubelet_url_stats = "http://#{env_host}:#{env_port}/stats/"
+            @cadvisor_url = "http://#{env_host}:#{env_port}/metrics/cadvisor"
           end
         end
 
@@ -221,45 +221,35 @@ module Fluent
         log.info("Use URL #{@cadvisor_url} for creating client to query cadvisor metrics api")
       end
 
-      # This method is used to set the options for sending a request to the kubelet api
-      def request_options
-        options = { method: 'get', url: @kubelet_url }
-        if @use_rest_client_ssl == true
+      def set_ssl_options
+        if @use_rest_client_ssl
           ssl_options = {
               ssl_ca_file: @ca_file,
               verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER,
               headers: {:Authorization => 'Bearer ' + File.read(@bearer_token_file)}
           }
-          options = options.merge(ssl_options)
         end
+        ssl_options
+      end
+
+      # This method is used to set the options for sending a request to the kubelet api
+      def request_options
+        options = { method: 'get', url: @kubelet_url }
+        options = options.merge(set_ssl_options())
         options
       end
 
       # This method is used to set the options for sending a request to the stats api
       def request_options_stats
         options = { method: 'get', url: @kubelet_url_stats }
-        if @use_rest_client_ssl == true
-          ssl_options = {
-              ssl_ca_file: @ca_file,
-              verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER,
-              headers: {:Authorization => 'Bearer ' + File.read(@bearer_token_file)}
-          }
-          options = options.merge(ssl_options)
-        end
+        options = options.merge(set_ssl_options())
         options
       end
 
       # This method is used to set the options for sending a request to the cadvisor api
       def cadvisor_request_options
         options = { method: 'get', url: @cadvisor_url }
-        if @use_rest_client_ssl == true
-          ssl_options = {
-              ssl_ca_file: @ca_file,
-              verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER,
-              headers: {:Authorization => 'Bearer ' + File.read(@bearer_token_file)}
-          }
-          options = options.merge(ssl_options)
-        end
+        options = options.merge(set_ssl_options())
         options
       end
 
