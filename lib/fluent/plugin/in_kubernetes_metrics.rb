@@ -228,6 +228,8 @@ module Fluent
               verify_ssl: @insecure_ssl ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER,
               headers: {:Authorization => 'Bearer ' + File.read(@bearer_token_file)}
           }
+        else
+          ssl_options = {}
         end
         ssl_options
       end
