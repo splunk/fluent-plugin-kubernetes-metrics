@@ -94,7 +94,19 @@ Used when use_rest_client config param is not enabled. Name of the nodes that th
 
 The port that kubelet is listening to.
 
-Default value: `10255`.
+Default value: `10250`.
+
+### use_rest_client (bool) (optional)
+
+Use the rest client to get the metrics from summary api on each kubelet.
+
+Default value: `true`.
+
+### use_rest_client_ssl (bool) (optional)
+
+Use SSL for rest client.
+
+Default value: `true`.
 
 ## License
 

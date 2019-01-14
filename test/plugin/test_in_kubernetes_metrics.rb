@@ -16,6 +16,8 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       insecure_ssl true
       interval 10s
       use_rest_client true
+      use_rest_client_ssl false
+      kubelet_port 10_255
   ]
 
   SUMMARY_CONFIG = %[
@@ -25,6 +27,8 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       insecure_ssl true
       interval 10s
       use_rest_client false
+      use_rest_client_ssl false
+      kubelet_port 10_255
   ]
   
   setup do
