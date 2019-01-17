@@ -138,7 +138,7 @@ module Fluent
 
         # Use SSL certificate and bearer token from Kubernetes service account.
         if Dir.exist?(@secret_dir)
-          secret_ca_file = File.join(@secret_dir, 'ca.cert')
+          secret_ca_file = File.join(@secret_dir, 'ca.crt')
           secret_token_file = File.join(@secret_dir, 'token')
 
           if @ca_file.nil? && File.exist?(secret_ca_file)
