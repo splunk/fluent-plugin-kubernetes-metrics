@@ -583,7 +583,7 @@ module Fluent
               image_name = image_name.split('"')[1]
               namespace = metric.match(/namespace="\S*"/).to_s
               namespace = namespace.split('"')[1]
-              metric_labels = {'pod_name' => pod_name, 'image' => image_name, 'namespace' => namespace, 'value' => metric_val}
+              metric_labels = {'pod_name' => pod_name, 'image' => image_name, 'namespace' => namespace, 'value' => metric_val, 'node' => @node_name}
               if metric.match(/^((?!container_name="POD").)*$/)
                 tag = 'pod'
                 tag = generate_tag("#{tag}#{metric_name.gsub('_', '.')}")
