@@ -487,7 +487,9 @@ module Fluent
           type = file_system['type']
           file_system.each do | file_metric |
             file_key , file_value = file_metric
-            router.emit generate_tag("#{tag}.filesystem.".concat(file_key)), time, labels.merge('device' => device, 'type' => type, 'value' => file_value)
+            if not ['device', 'type'].include? file_key
+              router.emit generate_tag("#{tag}.filesystem.".concat(file_key)), time, labels.merge('device' => device, 'type' => type, 'value' => file_value)
+            end
           end
         end
       end
