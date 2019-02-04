@@ -416,14 +416,14 @@ module Fluent
       end
 
       def emit_diskio_metrics_stats(tag:, metrics:, labels:, time:)
-        %w[io_service_bytes io_serviced].each do |metric_name|
+        %w[io_service_bytes io_serviced io_queued sectors io_service_time io_wait_time io_merged io_time ].each do |metric_name|
           if current_io_metric = metrics[metric_name]
             current_io_metric.each do |device|
             if diskio_io_service_bytes_major =  device['major']
-               router.emit generate_tag("#{tag}.diskio".concat(metric_name).concat("major")), time, labels.merge('device' => device['device'], 'value' => diskio_io_service_bytes_major)
+               router.emit generate_tag("#{tag}.diskio".concat(metric_name).concat(".major.")), time, labels.merge('device' => device['device'], 'value' => diskio_io_service_bytes_major)
             end
             if diskio_io_service_bytes_minor =  device['minor']
-               router.emit generate_tag("#{tag}.diskio".concat(metric_name).concat("minor")), time, labels.merge('device' => device['device'], 'value' => diskio_io_service_bytes_minor)
+               router.emit generate_tag("#{tag}.diskio".concat(metric_name).concat(".minor.")), time, labels.merge('device' => device['device'], 'value' => diskio_io_service_bytes_minor)
             end
             device_stats = device['stats']
             device_stats.each do | device_stat |
