@@ -110,4 +110,11 @@ module PluginTestHelper
     }.close
     get_stats_parsed_string
   end
+
+  def generate_tag(item_name, tag)
+    tag_prefix, tag_suffix = tag.split('*') if tag.include?('*')
+    return tag unless tag_prefix
+
+    [tag_prefix, item_name, tag_suffix].join
+  end
 end

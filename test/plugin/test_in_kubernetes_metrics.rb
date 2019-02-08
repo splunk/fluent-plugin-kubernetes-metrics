@@ -8,6 +8,7 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
   @@driver = nil
 
   @@hash_map_test = Hash.new
+  @@hash_map_cadvisor = Hash.new
 
   CONFIG = %[
       type kubernetes_metrics
@@ -37,10 +38,45 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
     @@parsed_unit_string = JSON.parse(get_unit_parsed_string)
     @@parsed_string2 = JSON.parse(get_stats_parsed_string)
 
+    get_cadvisor_parsed_string = nil
+    open(File.expand_path('../../metrics_cadvisor.txt', __FILE__)).tap { |f|
+      get_cadvisor_parsed_string = f.read()
+    }.close
+
     stub_k8s_requests
 
     @@driver = create_driver
     @@driver.run timeout:20,  expect_emits: 1, shutdown: true
+
+    metrics = get_cadvisor_parsed_string.split("\n")
+    for metric in metrics
+      if metric.include? "container_name="
+        if metric.match(/^((?!container_name="").)*$/) && metric[0] != '#'
+          metric_str, metric_val =  metric.split(" ")
+          first_occur = metric_str.index('{')
+          metric_name = metric_str[0..first_occur-1]
+          pod_name = metric.match(/pod_name="\S*"/).to_s
+          pod_name = pod_name.split('"')[1]
+          image_name = metric.match(/image="\S*"/).to_s
+          image_name = image_name.split('"')[1]
+          namespace = metric.match(/namespace="\S*"/).to_s
+          namespace = namespace.split('"')[1]
+          metric_labels = {'pod_name' => pod_name, 'image' => image_name, 'namespace' => namespace, 'value' => metric_val, 'node' => @node_name}
+          if metric.match(/^((?!container_name="POD").)*$/)
+            tag = 'pod'
+            tag = generate_tag("#{tag}#{metric_name.gsub('_', '.')}", @@driver.instance.tag)
+            tag = tag.gsub('container', '')
+          else
+            container_name = metric.match(/container_name="\S*"/).to_s
+            container_name = container_name.split('"')[1]
+            container_label = {'container_name' => container_name}
+            metric_labels.merge(container_label)
+            tag = generate_tag("#{metric_name.gsub('_', '.')}", @@driver.instance.tag)
+          end
+          @@hash_map_cadvisor[tag] = metric_labels["value"]
+        end
+      end
+    end
 
     @@driver.events.each do |tag, time, record|
       @@hash_map_test[tag] = tag, time, record
@@ -190,7 +226,5 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
     end
 
   end
-
-  # end
 
 end
