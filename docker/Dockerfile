@@ -28,7 +28,6 @@ RUN apk update \
  && gem install -N \
          fluentd:1.3.1 \
          fluent-plugin-record-modifier:1.1.0 \
-         fluent-plugin-splunk-hec:1.0.1 \
          oj:3.7.4 \
          multi_json:1.13.1 \
          bigdecimal:1.3.5 \
