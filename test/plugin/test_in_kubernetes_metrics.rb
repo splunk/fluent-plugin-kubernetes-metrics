@@ -45,6 +45,9 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
 
     stub_k8s_requests
 
+    @@ca_driver = create_driver
+    @@ca_driver.run timeout:20,  expect_emits: 1, shutdown: true
+
     @@driver = create_driver
     @@driver.run timeout:20,  expect_emits: 1, shutdown: true
 
@@ -76,6 +79,10 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
           @@hash_map_cadvisor[tag] = metric_labels["value"]
         end
       end
+    end
+
+    @@ca_driver.events.each do |tag, time, record|
+      @@hash_map_cadvisor[tag] = tag, time, record
     end
 
     @@driver.events.each do |tag, time, record|
@@ -209,6 +216,17 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       assert_not_nil events
     end
 
+  end
+
+  sub_test_case "metrics_cadvisor_unit_tests" do
+
+    test 'metrics cadvisor unit tests' do
+      puts 'should be a string kubernetes.metrics.*'
+
+      assert_not_nil @@hash_map_cadvisor.find('tag.string.default')
+      assert_equal @@hash_map_cadvisor['tag']['string']['default'], @@NeedThisVal['tag']['string']['default']["kubernetes.metrics.*"]
+
+    end
   end
 
   sub_test_case "node_stats_tests" do
