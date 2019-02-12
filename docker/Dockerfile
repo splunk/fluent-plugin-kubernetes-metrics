@@ -26,11 +26,13 @@ RUN apk update \
         ruby-dev wget gnupg \
  && echo 'gem: --no-document' >> /etc/gemrc \
  && gem install -N \
-         fluentd:1.3.1 \
+         fluentd:1.3.3 \
          fluent-plugin-record-modifier:1.1.0 \
-         oj:3.7.4 \
+         fluent-plugin-splunk-hec:1.0.1 \
+         oj:3.7.8 \
          multi_json:1.13.1 \
          bigdecimal:1.3.5 \
+         kubeclient:4.2.2 \
  && gem install -N /tmp/*.gem \
  && apk del .build-deps \
  && rm -rf /var/cache/apk/* \
