@@ -81,9 +81,6 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       end
     end
 
-    @@ca_driver.events.each do |tag, time, record|
-      @@hash_map_cadvisor[tag] = tag, time, record
-    end
 
     @@driver.events.each do |tag, time, record|
       @@hash_map_test[tag] = tag, time, record
@@ -209,7 +206,6 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
     end
 
     test 'summary_api' do
-
       d = create_driver SUMMARY_CONFIG
       d.run timeout:20,  expect_emits: 1, shutdown: true
       events = d.events
@@ -219,13 +215,9 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
   end
 
   sub_test_case "metrics_cadvisor_unit_tests" do
-
-    test 'metrics cadvisor unit tests' do
-      puts 'should be a string kubernetes.metrics.*'
-
-      assert_not_nil @@hash_map_cadvisor.find('tag.string.default')
-      assert_equal @@hash_map_cadvisor['tag']['string']['default'], @@NeedThisVal['tag']['string']['default']["kubernetes.metrics.*"]
-
+    test 'metrics cadvisor CPU tests' do
+      assert_not_nil @@hash_map_cadvisor.find('kube.container.cpu.load.average.10s')
+      assert_equal @@hash_map_cadvisor['kube.container.cpu.load.average.10s'], @@hash_map_test["kube.container.cpu.load.average.10s"][2]["value"]
     end
   end
 
