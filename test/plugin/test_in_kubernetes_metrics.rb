@@ -56,6 +56,9 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       if metric.include? "container_name="
         if metric.match(/^((?!container_name="").)*$/) && metric[0] != '#'
           metric_str, metric_val = metric.split(" ")
+          if metric_val.kind_of? String
+            metric_val = metric_val.to_f
+          end
           first_occur = metric_str.index('{')
           metric_name = metric_str[0..first_occur - 1]
           pod_name = metric.match(/pod_name="\S*"/).to_s
