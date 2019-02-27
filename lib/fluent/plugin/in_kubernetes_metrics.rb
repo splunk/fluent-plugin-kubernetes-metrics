@@ -487,7 +487,7 @@ module Fluent
           type = file_system['type']
           file_system.each do | file_metric |
             file_key , file_value = file_metric
-            if not ['device', 'type'].include? file_key
+            if not ['device', 'type', 'has_inodes'].include? file_key
               router.emit generate_tag("#{tag}.filesystem.".concat(file_key)), time, labels.merge('device' => device, 'type' => type, 'value' => file_value)
             end
           end
@@ -577,6 +577,9 @@ module Fluent
           if metric.include? "container_name="
             if metric.match(/^((?!container_name="").)*$/) && metric[0] != '#'
               metric_str, metric_val =  metric.split(" ")
+              if metric_val.kind_of? String
+                metric_val = metric_val.to_f
+              end
               first_occur = metric_str.index('{')
               metric_name = metric_str[0..first_occur-1]
               pod_name = metric.match(/pod_name="\S*"/).to_s
