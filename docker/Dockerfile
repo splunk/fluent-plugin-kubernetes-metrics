@@ -1,7 +1,10 @@
 FROM alpine:3.8
 
-LABEL maintainer="Don Tregonning <dtregonning@splunk.com>, Chaitanya Phalak <cphalak@splunk.com>"
-LABEL Description="Splunk Connect for Kubernetes docker image" Vendor="Splunk Inc." Version="1.1.Alpha"
+LABEL maintainer="Splunk Inc. <DataEdge@splunk.com>"
+LABEL Description="Splunk Connect for Kubernetes docker image" Vendor="Splunk Inc." Version=${VERSION}
+
+ARG VERSION
+ENV VERSION=${VERSION}
 
 ENV DUMB_INIT_VERSION=1.2.1
 ENV SU_EXEC_VERSION=0.2
@@ -28,7 +31,7 @@ RUN apk update \
  && gem install -N \
          fluentd:1.3.3 \
          fluent-plugin-record-modifier:1.1.0 \
-         fluent-plugin-splunk-hec:1.0.1 \
+         fluent-plugin-splunk-hec:${VERSION} \
          oj:3.7.8 \
          multi_json:1.13.1 \
          bigdecimal:1.3.5 \
