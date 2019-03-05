@@ -1,4 +1,4 @@
-# fluent-plugin-kubernetes-metrics
+# fFluentd Plugin for Kubernetes Metrics
 
 [Fluentd](https://fluentd.org/) input plugin to collect kubernetes cluster metrics from the Summary API, exposed by [Kubelet](https://kubernetes.io/docs/admin/kubelet/) on each node.
 
