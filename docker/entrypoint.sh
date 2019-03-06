@@ -9,8 +9,7 @@ if [ $? -eq 0 ]; then
 fi
 
 # (re)add the fluent user with $FLUENT_UID
-useradd -u ${uid} -o -c "" -m fluent
-export HOME=/home/fluent
+adduser -D -g '' -u ${uid} -h /home/fluent fluent
 
 #source vars if file exists
 DEFAULT=/etc/default/fluentd
@@ -25,4 +24,4 @@ fi
 chown -R fluent /home/fluent
 chown -R fluent /fluentd
 
-exec gosu fluent "$@"
+exec su-exec fluent "$@"
