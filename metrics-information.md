@@ -4,7 +4,7 @@
 
 | Terminology | Definition |
 | ---	| ---	|
-| Node | A single machine in a kubernetes cluster |
+| Node | A single machine in a kubernetes cluster. |
 | imagefs | Stats for the underlying filesystem where container images are stored. Usage here refers to the total number of bytes occupied by images on the filesystem. |
 | fs | Stats pertaining to total usage of filesystem resources on the rootfs used by node Kubernetes components. |
 | sys-container | Stats for system daemons tracked as raw containers. |
@@ -39,7 +39,7 @@ Metrics based on values extracted from aggregated files and field data.
 | kube.cluster.memory.limit	| float	| megabyte	| The cluster's memory limit. |
 | kube.cluster.memory.request	| float	| megabyte	| The cluster's memory request. |
 | kube.node.cpu.capacity|	float	| millicpu | The node's CPU capacity. |
-| kube.node.cpu.allocatable	| float	| millicpu	| The node's CPU allocatable. |
+| kube.node.cpu.allocatable	| float	| millicpu	| The node's allocatable CPU . |
 | kube.node.memory.capacity	| float	| megabyte	| The node's memory capacity. |
 | kube.node.memory.allocatable	| float	| megabyte	 | The node's allocatable memory.  |
 | kube.node.cpu.reservation	| float	| millicpu	| The node's CPU reservation. |
@@ -49,12 +49,12 @@ Metrics based on values extracted from aggregated files and field data.
 | kube.namespace.cpu.usage	| float	| millicpu	| The namespace's CPU usage. |
 | kube.namespace.memory.usage	| float	| megabyte	| The namespace's memory usage. |
 | kube.cluster.cpu.usage	| float	| millicpu	| The cluster's CPU usage. |
-| kube.cluster.memory.usage	| float	| bytes	| The luster's memory usage. |
+| kube.cluster.memory.usage	| float	| bytes	| The cluster's memory usage. |
 | kube.node.runtime | | | |
 
 ## Summary Metrics
 
-Provides a total count of observations and as a sum of all observed values.
+Provides metrics as a sum of all observed values.
 
 | Metric Name	| Metric Type	| Metric Format |	Metric Description |
 | --- | --- | --- | --- | 
@@ -88,11 +88,11 @@ Provides a total count of observations and as a sum of all observed values.
 | kube.sys-container.cpu.usage_rate	| float	| millicpu	| Total CPU usage (sum of all cores) averaged over the sample window for sys-container.	|
 | kube.sys-container.cpu.usage	| float	| millicpu	| Total CPU usage rate (sum of all cores) averaged over the sample window for sys-container.	|
 | kube.sys-container.memory.available_bytes	| float	| bytes	| The storage space available, in bytes, for the filesystem for sys-container.	|
-| kube.sys-container.memory.usage_bytes	|float	| bytes	| The node memory, in bytes, in use for the sys-container.	|
+| kube.sys-container.memory.usage_bytes	| float	| bytes	| The node memory, in bytes, in use for the sys-container.	|
 | kube.sys-container.memory.rss_bytes	| float	| bytes	| The amount of anonymous and swap cache memory, in bytes, for the sys-container. |	
 | kube.sys-container.memory.rss_bytes	| float	| bytes	| The amount of anonymous and swap cache memory, in bytes, for the sys-container.	|
-| kube.sys-container.memory.page_faults | integer	|   | The cumulative number of minor page faults for the sys-container.	|
-| kube.sys-container.memory.major_page_faults	| integer	|  | The cumulative number of major page faults for the sys-container. |
+| kube.sys-container.memory.page_faults | integer 	|   | The cumulative number of minor page faults for the sys-container.	|
+| kube.sys-container.memory.major_page_faults	| integer 	|  | The cumulative number of major page faults for the sys-container. |
 | kube.pod.uptime	| float	| seconds	| The pod's uptime. |	
 | kube.pod.cpu.usage_rate	| float	| millicpu	| Total CPU usage (sum of all cores), averaged over the sample window for the pod. |	
 | kube.pod.cpu.usage	| float | nanocpu	| Total CPU usage rate (sum of all cores), averaged over the sample window for the pod. |
@@ -166,22 +166,22 @@ Metrics based on measures and recording of data points and views.
 | kube.node.diskio.<disk_category>.minor | | | |
 | kube.node.diskio.<disk_category>.major	| | | |
 | kube.node.filesystem.available | | bytes | The bytes available for non-root user. |
-| kube.node.filesystem.base_usage	| | integer | Base usage consumed by the container's writable layer. At this time, this value is only applicable for Docker containers. |
+| kube.node.filesystem.base_usage	| integer |  | Base usage consumed by the container's writable layer. At this time, this value is only applicable for Docker containers. |
 | kube.node.filesystem.capacity	| | bytes | Bytes that can be consumed by the container on this filesystem. |
-| kube.node.filesystem.inodes	| | integer | Number of inodes. |
-| kube.node.filesystem.inodes_free | | integer | Number of available inodes. |
-| kube.node.filesystem.io_in_progress | | integer | Number of I/Os currently in progress. It is the only field that should go to zero. Value is incremented as requests are given to appropriate struct request_queue and decremented as they finish. |
+| kube.node.filesystem.inodes	| integer |  | Number of inodes. |
+| kube.node.filesystem.inodes_free | integer |  | Number of available inodes. |
+| kube.node.filesystem.io_in_progress | integer |  | Number of I/Os currently in progress. It is the only field that should go to zero. Value is incremented as requests are given to appropriate struct request_queue and decremented as they finish. |
 | kube.node.filesystem.io_time | | | Number of milliseconds spent doing I/Os. This field increases so long as field 9 is nonzero. |
 | kube.node.filesystem.read_time | | | Number of milliseconds spent reading, total number of milliseconds spent by all reads (as measured from make_request() to end_that_request_last()). |
-| kube.node.filesystem.reads_completed	| | integer | The total number of reads completed successfully. |
-| kube.node.filesystem.reads_merged	| | integer | Number of reads merged. Reads and writes which are adjacent to each other and may be merged for efficiency. For example, two 4K reads may become one 8K read before it is ultimately handed to the disk, and so it will be counted (and queued) as only one I/O. This field lets you know how often this was done. |
-| kube.node.filesystem.sectors_read	| | integer | Total number of sectors successfully read. |
-| kube.node.filesystem.sectors_written | | integer| The total number of sectors successfully written. |
+| kube.node.filesystem.reads_completed	| integer |  | The total number of reads completed successfully. |
+| kube.node.filesystem.reads_merged	| integer |  | Number of reads merged. Reads and writes which are adjacent to each other and may be merged for efficiency. For example, two 4K reads may become one 8K read before it is ultimately handed to the disk, and so it will be counted (and queued) as only one I/O. This field lets you know how often this was done. |
+| kube.node.filesystem.sectors_read	| integer |  | Total number of sectors successfully read. |
+| kube.node.filesystem.sectors_written | integer | | The total number of sectors successfully written. |
 | kube.node.filesystem.usage | | bytes | Number of bytes consumed by the container on this filesystem. |
 | kube.node.filesystem.weighted_io_time	| | | Weighted number of milliseconds spent doing I/Os. This field is incremented at each I/O start, I/O completion, I/O merge. Or the field can read these stats by the number of I/Os in progress (field 9) times the number of milliseconds spent doing I/O since the last update of this field. This can provide an easy measure of both I/O completion time and of the backlog that may be accumulating. |
 | kube.node.filesystem.write_time	| | | Total number of milliseconds spent by all writes, as measured from make_request() to end_that_request_last(). |
-| kube.node.filesystem.writes_completed	| | integer | Total number of writes completed successfully. |
-| kube.node.filesystem.writes_merged	| | integer | Number of writes merged. |
+| kube.node.filesystem.writes_completed	| integer | | Total number of writes completed successfully. |
+| kube.node.filesystem.writes_merged	| integer | | Number of writes merged. |
 | kube.node.memory.cache	| | bytes | Number of bytes of page cache memory in bytes. |
 | kube.node.memory.container_data.pgfault	| | | |
 | kube.node.memory.container_data.pgmajfault	| | | |
@@ -194,11 +194,11 @@ Metrics based on measures and recording of data points and views.
 | kube.node.memory.usage	| | bytes | Current memory usage, in bytes. This includes all memory regardless of when it was accessed. |
 | kube.node.memory.working_set	| | | The amount of working set memory, in bytes. This includes recently accessed memory, dirty memory, and kernel memory. Working set is <= "usage". |
 | kube.node.memory.mapped_file	| | | |
-| kube.node.tasks_stats.nr_io_wait | | integer | Number of tasks waiting on IO. |
-| kube.node.tasks_stats.nr_running	| | integer | Number of running tasks. |
-| kube.node.tasks_stats.nr_sleeping	| | integer | Number of sleeping tasks. |
-| kube.node.tasks_stats.nr_stopped	| | integer | Number of tasks in stopped state. |
-| kube.node.tasks_stats.nr_uninterruptible | | integer | Number of tasks in uninterruptible state. | 
+| kube.node.tasks_stats.nr_io_wait | integer | | Number of tasks waiting on IO. |
+| kube.node.tasks_stats.nr_running	| integer | | Number of running tasks. |
+| kube.node.tasks_stats.nr_sleeping	| integer | | Number of sleeping tasks. |
+| kube.node.tasks_stats.nr_stopped	| integer |  | Number of tasks in stopped state. |
+| kube.node.tasks_stats.nr_uninterruptible | integer |  | Number of tasks in uninterruptible state. | 
 | kube.node.network.<interface_id>.rx_bytes	| | bytes | Cumulative count of bytes received. |
 | kube.node.network.<interface_id>.rx_dropped	| | | Cumulative count of packets dropped while receiving. |
 | kube.node.network.<interface_id>.rx_errors	| | | Cumulative count of receive errors encountered. |
@@ -208,20 +208,20 @@ Metrics based on measures and recording of data points and views.
 | kube.node.network.<interface_id>.tx_errors	| | | Cumulative count of transmit errors encountered. |
 | kube.node.network.<interface_id>.tx_packets	| | |  Cumulative count of packets transmitted. |
 
- ## Cadvisor Metrics
+ ## cAdvisor Metrics
  
- cAdvisor provides performance and usage information for running containers. 
+ Performance and usage information for running containers. 
 
 | Metric Name	| Metric Description |
 | --- | --- |
-| cadvisor_version_info | A metric with a constant '1' value labeled by kernel version, OS version, docker version, cadvisor version & cadvisor revision.	|
-| container_cpu_load_average_10s	| Value of container cpu load average over the last 10 seconds.	|
-| container_cpu_system_seconds_total	| Cumulative system cpu time consumed in seconds.	|
-| container_cpu_usage_seconds_total	| Cumulative cpu time consumed in seconds.	|
-| container_cpu_user_seconds_total	| Cumulative user cpu time consumed in seconds.	|
-| container_fs_inodes_free	| Number of available Inodes. |	
-| container_fs_inodes_total	| Number of Inodes in use. |	
-| container_fs_io_current	| Number of I/Os currently in progress. |	      
+| cadvisor_version_info | A metric with a constant "1" value labeled by kernel version, OS version, Docker version, cAdvisor version and cAdvisor revision.	|
+| container_cpu_load_average_10s	| Value of container CPU load average over the last 10 seconds.	|
+| container_cpu_system_seconds_total	| Cumulative system CPU time consumed in seconds.	|
+| container_cpu_usage_seconds_total	| Cumulative CPU time consumed in seconds.	|
+| container_cpu_user_seconds_total	| Cumulative user CPU time consumed in seconds.	|
+| container_fs_inodes_free	| Number of available inodes. |	
+| container_fs_inodes_total	| Number of inodes in use. |	
+| container_fs_io_current	| Number of in progress I/Os. |	      
 | container_fs_io_time_seconds_total	| Cumulative count of seconds spent doing I/Os. |	
 | container_fs_io_time_weighted_seconds_total	| Cumulative weighted I/O time in seconds.	|
 | container_fs_limit_bytes	| Number of bytes that can be consumed by the container on this filesystem.	|
@@ -254,16 +254,16 @@ Metrics based on measures and recording of data points and views.
 | container_network_transmit_errors_total	| Cumulative count of errors encountered while transmitting.	|
 | container_network_transmit_packets_dropped_total	| Cumulative count of packets dropped while transmitting.	|
 | container_network_transmit_packets_total	| Cumulative count of packets transmitted. |	
-| container_network_udp_usage_total	| udp connection usage statistic for container. |	
-| container_scrape_error	| 1 if there was an error while getting container metrics, 0 otherwise. |	
+| container_network_udp_usage_total	| UDP connection usage statistic for container. |	
+| container_scrape_error	| "1" indicates an error while getting container metrics, "0" indicates no error. |	
 | container_spec_cpu_period	| CPU period of the container.	|
 | container_spec_cpu_shares	| CPU share of the container.	|
 | container_spec_memory_limit_bytes	| Memory limit for the container.	|
 | container_spec_memory_reservation_limit_bytes	| Memory reservation limit for the container.	|
 | container_spec_memory_swap_limit_bytes	| Memory swap limit for the container.	|
-| container_start_time_seconds	| Start time of the container since unix epoch in seconds.	|
+| container_start_time_seconds	| Start time of the container since Unix epoch in seconds.	|
 | container_tasks_state	| Number of tasks in given state.	|
 | machine_cpu_cores	| Number of CPU cores on the machine.	|
 | machine_memory_bytes	| Amount of memory installed on the machine.	|
-| container_cpu_cfs_throttled_seconds_total	| Total time duration the container has been throttled.	|
+| container_cpu_cfs_throttled_seconds_total	| Total time that the container has been throttled.	|
 
