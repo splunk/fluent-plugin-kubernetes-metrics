@@ -6,7 +6,7 @@
 | ---	| ---	|
 | Node | A single machine in a kubernetes cluster |
 | imagefs | Stats for the underlying filesystem where container images are stored. Usage here refers to the total number of bytes occupied by images on the filesystem. |
-| fs | Stats pertaining to total usage of filesystem resources on the rootfs used by node k8s components. |
+| fs | Stats pertaining to total usage of filesystem resources on the rootfs used by node Kubernetes components. |
 | sys-container | Stats for system daemons tracked as raw containers. |
 | runtime | Stats for the underlying container runtime. |
 | volume | Stats for volume usage of filesystem resources. |
@@ -16,7 +16,9 @@
  Reference: https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/stats/v1alpha1/types.go
 
 
-## Aggregator Metrics
+## Aggregated Metrics
+
+Metrics based on values extracted from aggregated files and field data. 
 
 | Metric Name | Metric Type	| Metric Format	| Metric Description |
 | ---	| ---	| ---	| ---	|
@@ -51,6 +53,8 @@
 | kube.node.runtime | | | |
 
 ## Summary Metrics
+
+Provides a total count of observations and as a sum of all observed values.
 
 | Metric Name	| Metric Type	| Metric Format |	Metric Description |
 | --- | --- | --- | --- | 
@@ -138,6 +142,9 @@ for the container.	|
 
 ## Stats Metrics
 
+Metrics based on measures and recording of data points and views.
+
+
 | Metric Name |	Metric Type	| Metric Format	| Metric Description |
 | --- | --- | --- | --- | 
 | kube.node.cpu.cfs.periods | ThrottlingData | uint64 | CPU Completely Fair Scheduler statistics. Total number of elapsed enforcement intervals. |
@@ -202,6 +209,8 @@ for the container.	|
 | kube.node.network.<interface_id>.tx_packets	| | |  Cumulative count of packets transmitted. |
 
  ## Cadvisor Metrics
+ 
+ cAdvisor provides performance and usage information for running containers. 
 
 | Metric Name	| Metric Description |
 | --- | --- |
