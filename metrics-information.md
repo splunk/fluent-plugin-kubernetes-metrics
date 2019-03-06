@@ -136,7 +136,7 @@ for the container.	|
 | kube.container.logs.inodes_used	| integer | |	The used inodes in the filesystem for the container's logs.	|
 
 
-## Statistic Metrics
+## Stats Metrics
 
 | Metric Name |	Metric Type	| Metric Format	| Metric Description |
 | --- | --- | --- | --- | 
