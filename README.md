@@ -7,7 +7,7 @@ The plugin collects metrics from:
    * The kubelet stats API
    * The cAdvisor metrics API
 
-The Fluentd input plugin can be configured to fetch metrics from either the Kublernetes API server or from the Kubelet itself. 
+The Fluentd input plugin can be configured to fetch metrics from the Kublernetes API server or from the Kubelet. For more details on the specific metrics that are collected and aggregated with this plugin, please refer to the [metrics information](https://github.com/splunk/fluent-plugin-kubernetes-metrics/blob/master/metrics-information.md) document.
 
 ## Installation
 
