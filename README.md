@@ -1,5 +1,5 @@
 [![CircleCI](https://circleci.com/gh/git-lfs/git-lfs.svg?style=shield&circle-token=856152c2b02bfd236f54d21e1f581f3e4ebf47ad)](https://circleci.com/gh/splunk/fluent-plugin-kubernetes-metrics)
-# fluent-plugin-kubernetes-metrics
+# Fluentd Plugin for Kubernetes Metrics
 
 The [Fluentd](https://fluentd.org/) input plugin collects kubernetes cluster metrics which are exposed by the [Kubelet API](https://kubernetes.io/docs/admin/kubelet/) and forwards them to fluentd.
 The plugin collects metrics from:
