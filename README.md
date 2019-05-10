@@ -97,9 +97,15 @@ The name of the node from which the plugin should collect metrics. This enables 
 
 Array of the nodes from which the this plugin should collect metrics. This enables the plugin to fetch metrics from kubeapiserver. Used only when use_rest_client configuration parameter is not enabled. 
 
+### kubelet_address (string) (optional)
+
+The address that Kubelet is on. This can be a hostname or an IP address. If this is not provided, node_name is used to fetch metrics from the Kubelet API.
+
+Default value: `nil`.
+
 ### kubelet_port (integer) (optional)
 
-The port that kubelet is listening to.
+The port that kubelet is listening on.
 
 Default value: `10250`.
 
