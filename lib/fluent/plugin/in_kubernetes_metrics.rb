@@ -61,8 +61,8 @@ module Fluent
       desc 'Name of the nodes that this plugin should collect metrics from.'
       config_param :node_names, :array, default: [], value_type: :string
 
-      desc 'The hostname or IP address that kubelet will use to connect to. If not supplied, node_name will be used instead.'
-      config_param :kubelet_address, :string, default: nil
+      desc 'The hostname or IP address that kubelet will use to connect to. If not supplied, status.hostIP of the node is used to fetch metrics from the Kubelet API (via the $KUBERNETES_NODE_IP environment variable)'
+      config_param :kubelet_address, :string, default: "#{ENV['KUBERNETES_NODE_IP']}"
 
       desc 'The port that kubelet is listening to.'
       config_param :kubelet_port, :integer, default: 10_250
@@ -196,11 +196,7 @@ module Fluent
       end
 
       def initialize_rest_client
-        if @kubelet_address.nil?
-          env_host = @node_name
-        else
-          env_host = @kubelet_address
-        end
+        env_host = @kubelet_address
         env_port = @kubelet_port
 
         if env_host && env_port

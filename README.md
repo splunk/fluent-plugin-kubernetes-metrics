@@ -99,9 +99,9 @@ Array of the nodes from which the this plugin should collect metrics. This enabl
 
 ### kubelet_address (string) (optional)
 
-The address that Kubelet is on. This can be a hostname or an IP address. If this is not provided, node_name is used to fetch metrics from the Kubelet API.
+The hostname or IP address that kubelet will use to connect to. If not supplied, status.hostIP of the node is used to fetch metrics from the Kubelet API (via the $KUBERNETES_NODE_IP environment variable).
 
-Default value: `nil`.
+Default value: `"#{ENV['KUBERNETES_NODE_IP']}"`.
 
 ### kubelet_port (integer) (optional)
 
