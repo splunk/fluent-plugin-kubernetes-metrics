@@ -1,13 +1,15 @@
 [![CircleCI](https://circleci.com/gh/git-lfs/git-lfs.svg?style=shield&circle-token=856152c2b02bfd236f54d21e1f581f3e4ebf47ad)](https://circleci.com/gh/splunk/fluent-plugin-kubernetes-metrics)
 # Fluentd Plugin for Kubernetes Metrics
 
-The [Fluentd](https://fluentd.org/) input plugin collects kubernetes cluster metrics which are exposed by the [Kubelet API](https://kubernetes.io/docs/admin/kubelet/) and forwards them to fluentd.
+The [Fluentd](https://fluentd.org/) input plugin collects Kubernetes cluster metrics which are exposed by the [Kubelet API](https://kubernetes.io/docs/admin/kubelet/) and forwards them to fluentd.
 The plugin collects metrics from:
    * The kubelet summary API
    * The kubelet stats API
    * The cAdvisor metrics API
 
-The Fluentd input plugin can be configured to fetch metrics from either the Kublernetes API server or from the Kubelet itself. 
+The Fluentd input plugin can be configured to fetch metrics from the Kubernetes API server or from the Kubelet. 
+For more details on the specific metrics that are collected and aggregated with this plugin, please refer to the 
+[metrics information](https://github.com/splunk/fluent-plugin-kubernetes-metrics/blob/master/metrics-information.md) document.
 
 ## Installation
 
@@ -95,9 +97,15 @@ The name of the node from which the plugin should collect metrics. This enables 
 
 Array of the nodes from which the this plugin should collect metrics. This enables the plugin to fetch metrics from kubeapiserver. Used only when use_rest_client configuration parameter is not enabled. 
 
+### kubelet_address (string) (optional)
+
+The hostname or IP address that kubelet will use to connect to. If not supplied, status.hostIP of the node is used to fetch metrics from the Kubelet API (via the $KUBERNETES_NODE_IP environment variable).
+
+Default value: `"#{ENV['KUBERNETES_NODE_IP']}"`.
+
 ### kubelet_port (integer) (optional)
 
-The port that kubelet is listening to.
+The port that kubelet is listening on.
 
 Default value: `10250`.
 
