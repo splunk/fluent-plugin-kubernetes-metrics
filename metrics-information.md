@@ -71,7 +71,7 @@ Provides metrics as a sum of all observed values.
 | kube.node.network.tx_bytes |	float |	bytes |	The cumulative count of bytes transmitted in the node.	|
 | kube.node.network.tx_errors	| integer | | The cumulative count of transmit errors encountered in the node.	|
 | kube.node.fs.available_bytes | float	| bytes	| The storage space available, in bytes, for the filesystem on the node.	|
-| kube.node.fs.capacity_bytes	| float	| bytes	| The total capacity, in bytes, of the filesystems underlying storage on the node.	|
+| kube.node.fs.capacity_bytes	| float	| bytes	| The total capacity, in bytes, of the filesystem's underlying storage on the node.	|
 | kube.node.fs.used_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem on the node.	|
 | kube.node.fs.inodes_free	| integer	| | The free inodes in the filesystem on the node.	|
 | kube.node.fs.inodes	| integer |  |	The total inodes in the filesystem on the node.	|
@@ -96,22 +96,22 @@ Provides metrics as a sum of all observed values.
 | kube.pod.uptime	| float	| seconds	| The pod's uptime. |	
 | kube.pod.cpu.usage_rate	| float	| millicpu	| Total CPU usage (sum of all cores), averaged over the sample window for the pod. |	
 | kube.pod.cpu.usage	| float | nanocpu	| Total CPU usage rate (sum of all cores), averaged over the sample window for the pod. |
-| kube.pod.memory.available_bytes	| float	| bytes	| Represents the storage space available, in bytes, for the filesystem for the pod.	|
-| kube.pod.memory.usage_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem for the pod.	|
-| kube.pod.memory.rss_bytes	| float	| bytes	| The amount of anonymous and swap cache memory, in bytes, for the pod.	|
-| kube.pod.memory.page_faults	| integer	|  | The cumulative number of minor page faults for the pod.	|
-| kube.pod.memory.major_page_faults	| integer	| | The cumulative number of minor page faults for the pod.	|
-| kube.pod.network.rx_bytes	| float	| bytes	| The cumulative count of bytes received for the pod.	|
-| kube.pod.network.rx_errors	| integer	|  | The cumulative count of receive errors encountered for the pod.	|
-| kube.pod.network.tx_bytes	| float	| bytes	| The cumulative count of bytes transmitted for the pod.	|
-| kube.pod.network.tx_errors	| integer | | The cumulative count of transmit errors encountered for the pod.	|
+| kube.pod.memory.available_bytes	| float	| bytes	| Represents the storage space available, in bytes, for the filesystem on the pod.	|
+| kube.pod.memory.usage_bytes	| float	| bytes	| The bytes used for a specific task in the filesystem on the pod.	|
+| kube.pod.memory.rss_bytes	| float	| bytes	| The amount of anonymous and swap cache memory, in bytes, in the pod.	|
+| kube.pod.memory.page_faults	| integer	|  | The cumulative number of minor page faults in the pod.	|
+| kube.pod.memory.major_page_faults	| integer	| | The cumulative number of minor page faults in the pod.	|
+| kube.pod.network.rx_bytes	| float	| bytes	| The cumulative count of bytes received in the pod.	|
+| kube.pod.network.rx_errors	| integer	|  | The cumulative count of receive errors encountered in the pod.	|
+| kube.pod.network.tx_bytes	| float	| bytes	| The cumulative count of bytes transmitted in the pod.	|
+| kube.pod.network.tx_errors	| integer | | The cumulative count of transmit errors in the pod.	|
 | kube.pod.ephemeral-storage.available_bytes	| float	| bytes	| The node's available memory for use, in bytes, in the pod's ephemeral storage.	|
-| kube.pod.ephemeral-storage.capacity_bytes	| float	| bytes	| The total capacity, in bytes, of the filesystem's underlying storage for the pod's ephemeral storage.	|
-| kube.pod.ephemeral-storage.used_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem for the pod's ephemeral storage.	|
+| kube.pod.ephemeral-storage.capacity_bytes	| float	| bytes	| The total capacity, in bytes, of the filesystem's underlying storage in the pod's ephemeral storage.	|
+| kube.pod.ephemeral-storage.used_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem in the pod's ephemeral storage.	|
 | kube.pod.ephemeral-storage.inodes_free	|integer	|  | The free inodes in the filesystem in the pod's ephemeral storage.	|
-| kube.pod.ephemeral-storage.inodes	| integer |   | The inodes in the filesystem for the pod's ephemeral storage.	|
-| kube.pod.ephemeral-storage.inodes_used	| integer |  |	The inodes used in the filesystem for the pod's ephemeral storage.	|
-| kube.pod.volume.available_bytes	| float	| bytes	| The storage space available, in bytes, for the filesystem for the pod's volume.	|
+| kube.pod.ephemeral-storage.inodes	| integer |   | The inodes in the filesystem in the pod's ephemeral storage.	|
+| kube.pod.ephemeral-storage.inodes_used	| integer |  |	The inodes used in the filesystem in the pod's ephemeral storage.	|
+| kube.pod.volume.available_bytes	| float	| bytes	| The storage space available, in bytes, for the filesystem in the pod's volume.	|
 | kube.pod.volume.capacity_bytes	| float	| bytes	| The total capacity, in bytes, of the filesystems underlying storage for the pod's volume.	|
 | kube.pod.volume.used_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem for the pod's volume.	|
 | kube.pod.volume.inodes_free	| integer |  |	The free inodes in the filesystem for the pod's volume.	|
@@ -121,23 +121,23 @@ Provides metrics as a sum of all observed values.
 | kube.container.cpu.usage_rate	| float	| millicpu	| Total CPU usage rate (sum of all cores) averaged over the sample window for the container.	|
 | kube.container.cpu.usage	| float	| nanocpu	| Total CPU usage rate (sum of all cores) averaged over the sample window 
 for the container.	|
-| kube.container.memory.available_bytes	| float	| bytes	| The storage space available, in bytes, for the filesystem for the container.	|
-| kube.container.memory.usage_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem for the container. |
-| kube.container.memory.rss_bytes	| float	| bytes	| The amount of anonymous and swap cache memory in bytes for the container.	|
-| kube.container.memory.page_faults	| integer	|  | The cumulative number of minor page faults for the container.	|
-| kube.container.memory.major_page_faults	| integer	|  | The cumulative number of major page faults for the container.	|
-| kube.container.rootfs.available_bytes	| float	| bytes	| The storage space available, in bytes, for the filesystem for the container's rootfs.	|
-| kube.container.rootfs.capacity_bytes	| float	| bytes	| The total capacity, in bytes, of the filesystems underlying storage for the container's rootfs.	|
-| kube.container.rootfs.used_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem for the container's rootfs.	|
-| kube.container.rootfs.inodes_free	| integer | |	The free inodes in the filesystem for the container's rootfs. |	
-| kube.container.rootfs.inodes	| integer	| | The inodes in the filesystem for the container's rootfs.	|
-| kube.container.rootfs.inodes_used	| integer	| | Represents the used inodes in the filesystem for the container's rootfs.	|
-| kube.container.logs.available_bytes	| float |	bytes	| The storage space available, in bytes, for the filesystem for the container's logs.	|
-| kube.container.logs.capacity_bytes	| float	| bytes	 | The total capacity, in bytes, of the filesystem's underlying storage for the container's logs.	|
-| kube.container.logs.used_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem for the container's logs.	|
-| kube.container.logs.inodes_free	| integer | |	The free inodes in the filesystem for the container's logs.	|
-| kube.container.logs.inodes	| integer	| | The inodes in the filesystem for the container's logs.	|
-| kube.container.logs.inodes_used	| integer | |	The used inodes in the filesystem for the container's logs.	|
+| kube.container.memory.available_bytes	| float	| bytes	| The storage space available, in bytes, for the filesystem in the container.	|
+| kube.container.memory.usage_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem in the container. |
+| kube.container.memory.rss_bytes	| float	| bytes	| The amount of anonymous and swap cache memory in bytes in the container.	|
+| kube.container.memory.page_faults	| integer	|  | The cumulative number of minor page faults in the container.	|
+| kube.container.memory.major_page_faults	| integer	|  | The cumulative number of major page faults in the container.	|
+| kube.container.rootfs.available_bytes	| float	| bytes	| The storage space available, in bytes, in the filesystem in the container's rootfs.	|
+| kube.container.rootfs.capacity_bytes	| float	| bytes	| The total capacity, in bytes, of the filesystem's underlying storage in the container's rootfs.	|
+| kube.container.rootfs.used_bytes	| float	| bytes	| The bytes used for a specific task in the filesystem on the container's rootfs.	|
+| kube.container.rootfs.inodes_free	| integer | |	The free inodes in the filesystem on the container's rootfs. |	
+| kube.container.rootfs.inodes	| integer	| | The inodes in the filesystem on the container's rootfs.	|
+| kube.container.rootfs.inodes_used	| integer	| | Represents the used inodes in the filesystem on the container's rootfs.	|
+| kube.container.logs.available_bytes	| float |	bytes	| The storage space available, in bytes, for the filesystem on the container's logs.	|
+| kube.container.logs.capacity_bytes	| float	| bytes	 | The total capacity, in bytes, of the filesystem's underlying storage in the container's logs.	|
+| kube.container.logs.used_bytes	| float	| bytes	| The bytes used for a specific task on the filesystem in the container's logs.	|
+| kube.container.logs.inodes_free	| integer | |	The free inodes in the filesystem in the container's logs.	|
+| kube.container.logs.inodes	| integer	| | The inodes in the filesystem in the container's logs.	|
+| kube.container.logs.inodes_used	| integer | |	The used inodes in the filesystem in the container's logs.	|
 
 
 ## Stats Metrics
@@ -173,10 +173,10 @@ Metrics based on measures and recording of data points and views.
 | kube.node.filesystem.io_in_progress | integer |  | Number of I/Os currently in progress. It is the only field that should go to zero. Value is incremented as requests are given to appropriate struct request_queue and decremented as they finish. |
 | kube.node.filesystem.io_time | | | Number of milliseconds spent doing I/Os. This field increases so long as field 9 is nonzero. |
 | kube.node.filesystem.read_time | | | Number of milliseconds spent reading, total number of milliseconds spent by all reads (as measured from make_request() to end_that_request_last()). |
-| kube.node.filesystem.reads_completed	| integer |  | The total number of reads completed successfully. |
-| kube.node.filesystem.reads_merged	| integer |  | Number of reads merged. Reads and writes which are adjacent to each other and may be merged for efficiency. For example, two 4K reads may become one 8K read before it is ultimately handed to the disk, and so it will be counted (and queued) as only one I/O. This field lets you know how often this was done. |
-| kube.node.filesystem.sectors_read	| integer |  | Total number of sectors successfully read. |
-| kube.node.filesystem.sectors_written | integer | | The total number of sectors successfully written. |
+| kube.node.filesystem.reads_completed	| | integer | The total number of reads completed successfully. |
+| kube.node.filesystem.reads_merged	| | integer | Number of reads merged. Reads and writes which are adjacent to each other and may be merged for efficiency. For example, two 4K reads may become one 8K read before it is ultimately handed to the disk, and so it will be counted (and queued) as only one I/O. This field lets you know how often this was done. |
+| kube.node.filesystem.sectors_read	| | integer | Total number of successfully read sectors. |
+| kube.node.filesystem.sectors_written | | integer| The total number of successfully written sectors. |
 | kube.node.filesystem.usage | | bytes | Number of bytes consumed by the container on this filesystem. |
 | kube.node.filesystem.weighted_io_time	| | | Weighted number of milliseconds spent doing I/Os. This field is incremented at each I/O start, I/O completion, I/O merge. Or the field can read these stats by the number of I/Os in progress (field 9) times the number of milliseconds spent doing I/O since the last update of this field. This can provide an easy measure of both I/O completion time and of the backlog that may be accumulating. |
 | kube.node.filesystem.write_time	| | | Total number of milliseconds spent by all writes, as measured from make_request() to end_that_request_last(). |

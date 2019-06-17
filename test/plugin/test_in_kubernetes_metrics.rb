@@ -19,6 +19,7 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       use_rest_client true
       use_rest_client_ssl false
       kubelet_port 10_255
+      kubelet_address generics-aws-node-name
   ).freeze
 
   SUMMARY_CONFIG = %(
@@ -30,6 +31,7 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       use_rest_client false
       use_rest_client_ssl false
       kubelet_port 10_255
+      kubelet_address generics-aws-node-name
   ).freeze
 
   setup do
