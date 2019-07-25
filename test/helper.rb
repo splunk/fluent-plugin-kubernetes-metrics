@@ -83,6 +83,13 @@ module PluginTestHelper
     end.close
   end
 
+  def stub_kubelet_summary_api_missing_timestamps
+    open(File.expand_path('unit_without_time.json', __dir__)).tap do |f|
+      stub_request(:get, kubelet_summary_api_url.to_s)
+        .to_return(body: f.read)
+    end.close
+  end
+
   def stub_metrics_cadvisor
     open(File.expand_path('metrics_cadvisor.txt', __dir__)).tap do |f|
       stub_request(:get, kubelet_cadvisor_api_url.to_s)
@@ -114,6 +121,14 @@ module PluginTestHelper
   def get_unit_parsed_string
     parsed_string = nil
     open(File.expand_path('unit.json', __dir__)).tap do |f|
+      parsed_string = f.read
+    end.close
+    parsed_string
+  end
+
+  def get_unit_parsed_string_missing_timestamps
+    parsed_string = nil
+    open(File.expand_path('unit_without_time.json', __dir__)).tap do |f|
       parsed_string = f.read
     end.close
     parsed_string

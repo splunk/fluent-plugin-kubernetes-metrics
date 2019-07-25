@@ -300,96 +300,112 @@ module Fluent
       end
 
       def emit_uptime(tag:, start_time:, labels:)
-        uptime = @scraped_at - Time.iso8601(start_time)
-        router.emit generate_tag("#{tag}.uptime"), Fluent::EventTime.from_time(@scraped_at), labels.merge('value' => uptime)
+        unless start_time.nil?
+          uptime = @scraped_at - Time.iso8601(start_time)
+          router.emit generate_tag("#{tag}.uptime"), Fluent::EventTime.from_time(@scraped_at), labels.merge('value' => uptime)
+        end
       end
 
       def emit_cpu_metrics(tag:, metrics:, labels:)
-        time = parse_time metrics['time']
-        if usage_rate = metrics['usageNanoCores']
-          router.emit generate_tag("#{tag}.cpu.usage_rate"), time, labels.merge('value' => usage_rate / 1_000_000)
-        end
-        if usage = metrics['usageNanoCores']
-          router.emit generate_tag("#{tag}.cpu.usage"), time, labels.merge('value' => usage)
+        unless metrics['time'].nil?
+          time = parse_time metrics['time']
+          if usage_rate = metrics['usageNanoCores']
+            router.emit generate_tag("#{tag}.cpu.usage_rate"), time, labels.merge('value' => usage_rate / 1_000_000)
+          end
+          if usage = metrics['usageNanoCores']
+            router.emit generate_tag("#{tag}.cpu.usage"), time, labels.merge('value' => usage)
+          end
         end
       end
 
       def emit_memory_metrics(tag:, metrics:, labels:)
-        time = parse_time metrics['time']
-        %w[availableBytes usageBytes workingSetBytes rssBytes pageFaults majorPageFaults].each do |name|
-          if value = metrics[name]
-            router.emit generate_tag("#{tag}.memory.#{underscore name}"), time, labels.merge('value' => value)
+        unless metrics['time'].nil?
+          time = parse_time metrics['time']
+          %w[availableBytes usageBytes workingSetBytes rssBytes pageFaults majorPageFaults].each do |name|
+            if value = metrics[name]
+              router.emit generate_tag("#{tag}.memory.#{underscore name}"), time, labels.merge('value' => value)
+            end
           end
         end
       end
 
       def emit_network_metrics(tag:, metrics:, labels:)
-        time = parse_time metrics['time']
-        Array(metrics['interfaces']).each do |it|
-          it_name = it['name']
-          %w[rxBytes rxErrors txBytes txErrors].each do |metric_name|
-            if value = it[metric_name]
-              router.emit generate_tag("#{tag}.network.#{underscore metric_name}"), time, labels.merge('value' => value, 'interface' => it_name)
+        unless metrics['time'].nil?
+          time = parse_time metrics['time']
+          Array(metrics['interfaces']).each do |it|
+            it_name = it['name']
+            %w[rxBytes rxErrors txBytes txErrors].each do |metric_name|
+              if value = it[metric_name]
+                router.emit generate_tag("#{tag}.network.#{underscore metric_name}"), time, labels.merge('value' => value, 'interface' => it_name)
+              end
             end
           end
         end
       end
 
       def emit_fs_metrics(tag:, metrics:, labels:)
-        time = parse_time metrics['time']
-        %w[availableBytes capacityBytes usedBytes inodesFree inodes inodesUsed].each do |metric_name|
-          if value = metrics[metric_name]
-            router.emit generate_tag("#{tag}.#{underscore metric_name}"), time, labels.merge('value' => value)
+        unless metrics['time'].nil?
+          time = parse_time metrics['time']
+          %w[availableBytes capacityBytes usedBytes inodesFree inodes inodesUsed].each do |metric_name|
+            if value = metrics[metric_name]
+              router.emit generate_tag("#{tag}.#{underscore metric_name}"), time, labels.merge('value' => value)
+            end
           end
         end
       end
 
       def emit_node_rlimit_metrics(node_name, rlimit)
-        time = parse_time rlimit['time']
-        %w[maxpid curproc].each do |metric_name|
-          next unless value = rlimit[metric_name]
+        unless rlimit['time'].nil?
+          time = parse_time rlimit['time']
+          %w[maxpid curproc].each do |metric_name|
+            next unless value = rlimit[metric_name]
 
-          router.emit(generate_tag("node.runtime.imagefs.#{metric_name}"), time,
-                      'value' => value,
-                      'node' => node_name)
+            router.emit(generate_tag("node.runtime.imagefs.#{metric_name}"), time,
+                        'value' => value,
+                        'node' => node_name)
+          end
         end
       end
 
       def emit_system_container_metrics(node_name, container)
         tag = 'sys-container'
         labels = { 'node' => node_name, 'name' => container['name'] }
-        emit_uptime tag: tag, start_time: container['startTime'], labels: labels
-        emit_cpu_metrics tag: tag, metrics: container['cpu'], labels: labels
-        emit_memory_metrics tag: tag, metrics: container['memory'], labels: labels
+        unless container['startTime'].nil?
+          emit_uptime tag: tag, start_time: container['startTime'], labels: labels
+          emit_cpu_metrics tag: tag, metrics: container['cpu'], labels: labels unless container['cpu'].nil?
+          emit_memory_metrics tag: tag, metrics: container['memory'], labels: labels unless container['memory'].nil?
+        end
       end
 
       def emit_stats_breakdown(stats)
         stats_latest = stats[-1]
         tag = 'node'
         labels = { 'node' => @node_name }
-        stats_timestamp = parse_time stats_latest['timestamp']
-        unless stats_latest['cpu'].nil?
-          emit_cpu_metrics_stats tag: tag, metrics: stats_latest['cpu'], labels: labels, time: stats_timestamp
-        end
+        unless stats_latest['timestamp'].nil?
+          stats_timestamp = parse_time stats_latest['timestamp']
+          unless stats_latest['cpu'].nil?
+            emit_cpu_metrics_stats tag: tag, metrics: stats_latest['cpu'], labels: labels, time: stats_timestamp
+          end
 
-        unless stats_latest['diskio'].nil?
-          emit_diskio_metrics_stats tag: tag, metrics: stats_latest['diskio'], labels: labels, time: stats_timestamp
-        end
+          unless stats_latest['diskio'].nil?
+            emit_diskio_metrics_stats tag: tag, metrics: stats_latest['diskio'], labels: labels, time: stats_timestamp
+          end
 
-        unless stats_latest['memory'].nil?
-          emit_memory_metrics_stats tag: tag, metrics: stats_latest['memory'], labels: labels, time: stats_timestamp
-        end
+          unless stats_latest['memory'].nil?
+            emit_memory_metrics_stats tag: tag, metrics: stats_latest['memory'], labels: labels, time: stats_timestamp
+          end
 
-        unless stats_latest['network'].nil?
-          emit_network_metrics_stats tag: tag, metrics: stats_latest['network'], labels: labels, time: stats_timestamp
-        end
+          unless stats_latest['network'].nil?
+            emit_network_metrics_stats tag: tag, metrics: stats_latest['network'], labels: labels, time: stats_timestamp
+          end
 
-        unless stats_latest['filesystem'].nil?
-          emit_filesystem_metrics_stats tag: tag, metrics: stats_latest['filesystem'], labels: labels, time: stats_timestamp
-        end
+          unless stats_latest['filesystem'].nil?
+            emit_filesystem_metrics_stats tag: tag, metrics: stats_latest['filesystem'], labels: labels, time: stats_timestamp
+          end
 
-        unless stats_latest['task_stats'].nil?
-          emit_tasks_stats_metrics_stats tag: tag, metrics: stats_latest['task_stats'], labels: labels, time: stats_timestamp
+          unless stats_latest['task_stats'].nil?
+            emit_tasks_stats_metrics_stats tag: tag, metrics: stats_latest['task_stats'], labels: labels, time: stats_timestamp
+          end
         end
       end
 
@@ -429,9 +445,9 @@ module Fluent
             if diskio_io_service_bytes_minor = device['minor']
               router.emit generate_tag("#{tag}.diskio".concat(metric_name).concat('.minor.')), time, labels.merge('device' => device['device'], 'value' => diskio_io_service_bytes_minor)
             end
-            device_stats = device['stats']
+            device_stats = device['stats'] unless device['stats'].nil?
             device_stats.each do |device_stat|
-              device_key, device_value = device_stat
+              device_key, device_value = device_stat unless device_stat.nil?
               router.emit generate_tag("#{tag}.diskio.".concat(metric_name).concat('.stats.').concat(device_key)), time, labels.merge('device' => device['device'], 'value' => device_value)
             end
           end
@@ -448,7 +464,7 @@ module Fluent
           next unless current_memory_metric_group = metrics[metric_name_group]
 
           current_memory_metric_group.each do |metric_name|
-            metric_key, metric_value = metric_name
+            metric_key, metric_value = metric_name unless metric_name.nil?
             router.emit generate_tag("#{tag}.memory.".concat(metric_name_group).concat('.').concat(metric_key)), time, labels.merge('value' => metric_value)
           end
         end
@@ -477,7 +493,7 @@ module Fluent
           next unless metric_group = metrics[metric_name_group]
 
           metric_group.each do |current_metric|
-            metric_key, metric_value = current_metric
+            metric_key, metric_value = current_metric unless current_metric.nil?
             router.emit generate_tag("#{tag}.network.".concat(metric_name_group).concat('.').concat(metric_key)), time, labels.merge('value' => metric_value)
           end
         end
@@ -488,7 +504,7 @@ module Fluent
           device = file_system['device']
           type = file_system['type']
           file_system.each do |file_metric|
-            file_key, file_value = file_metric
+            file_key, file_value = file_metric unless file_metric.nil?
             unless %w[device type has_inodes].include? file_key
               router.emit generate_tag("#{tag}.filesystem.".concat(file_key)), time, labels.merge('device' => device, 'type' => type, 'value' => file_value)
             end
@@ -498,7 +514,7 @@ module Fluent
 
       def emit_tasks_stats_metrics_stats(tag:, metrics:, labels:, time:)
         metrics.each do |task_stats|
-          task_key, task_value = task_stats
+          task_key, task_value = task_stats unless task_stats.nil?
           router.emit generate_tag("#{tag}.tasks_stats.".concat(task_key)), time, labels.merge('value' => task_value)
         end
       end
@@ -510,28 +526,28 @@ module Fluent
 
         unless node['startTime'].nil?
           emit_uptime tag: tag, start_time: node['startTime'], labels: labels
-        end
-        unless node['cpu'].nil?
-          emit_cpu_metrics tag: tag, metrics: node['cpu'], labels: labels
-        end
-        unless node['memory'].nil?
-          emit_memory_metrics tag: tag, metrics: node['memory'], labels: labels
-        end
-        unless node['network'].nil?
-          emit_network_metrics tag: tag, metrics: node['network'], labels: labels
-        end
-        unless node['fs'].nil?
-          emit_fs_metrics tag: "#{tag}.fs", metrics: node['fs'], labels: labels
-        end
-        unless node['runtime']['imageFs'].nil?
-          emit_fs_metrics tag: "#{tag}.imagefs", metrics: node['runtime']['imageFs'], labels: labels
-        end
-        unless node['rlimit'].nil?
-          emit_node_rlimit_metrics node_name, node['rlimit']
-        end
-        unless node['systemContainers'].nil?
-          node['systemContainers'].each do |c|
-            emit_system_container_metrics node_name, c
+          unless node['cpu'].nil?
+            emit_cpu_metrics tag: tag, metrics: node['cpu'], labels: labels
+          end
+          unless node['memory'].nil?
+            emit_memory_metrics tag: tag, metrics: node['memory'], labels: labels
+          end
+          unless node['network'].nil?
+            emit_network_metrics tag: tag, metrics: node['network'], labels: labels
+          end
+          unless node['fs'].nil?
+            emit_fs_metrics tag: "#{tag}.fs", metrics: node['fs'], labels: labels
+          end
+          unless node['runtime']['imageFs'].nil?
+            emit_fs_metrics tag: "#{tag}.imagefs", metrics: node['runtime']['imageFs'], labels: labels
+          end
+          unless node['rlimit'].nil?
+            emit_node_rlimit_metrics node_name, node['rlimit']
+          end
+          unless node['systemContainers'].nil?
+            node['systemContainers'].each do |c|
+              emit_system_container_metrics node_name, c unless c.nil?
+            end
           end
         end
       end
@@ -539,11 +555,13 @@ module Fluent
       def emit_container_metrics(pod_labels, container)
         tag = 'container'
         labels = pod_labels.merge 'container-name' => container['name']
-        emit_uptime tag: tag, start_time: container['startTime'], labels: labels
-        emit_cpu_metrics tag: tag, metrics: container['cpu'], labels: labels
-        emit_memory_metrics tag: tag, metrics: container['memory'], labels: labels
-        emit_fs_metrics tag: "#{tag}.rootfs", metrics: container['rootfs'], labels: labels
-        emit_fs_metrics tag: "#{tag}.logs", metrics: container['logs'], labels: labels
+        unless container['startTime'].nil?
+          emit_uptime tag: tag, start_time: container['startTime'], labels: labels
+          emit_cpu_metrics tag: tag, metrics: container['cpu'], labels: labels unless container['cpu'].nil?
+          emit_memory_metrics tag: tag, metrics: container['memory'], labels: labels unless container['memory'].nil?
+          emit_fs_metrics tag: "#{tag}.rootfs", metrics: container['rootfs'], labels: labels unless container['rootfs'].nil?
+          emit_fs_metrics tag: "#{tag}.logs", metrics: container['logs'], labels: labels unless container['logs'].nil?
+        end
       end
 
       def emit_pod_metrics(node_name, pod)
@@ -551,16 +569,22 @@ module Fluent
         labels = pod['podRef'].transform_keys &'pod-'.method(:+)
         labels['node'] = node_name
 
-        emit_uptime tag: tag, start_time: pod['startTime'], labels: labels
-        emit_cpu_metrics tag: tag, metrics: pod['cpu'], labels: labels if pod['cpu']
-        emit_memory_metrics tag: tag, metrics: pod['memory'], labels: labels if pod['memory']
-        emit_network_metrics tag: tag, metrics: pod['network'], labels: labels
-        emit_fs_metrics tag: "#{tag}.ephemeral-storage", metrics: pod['ephemeral-storage'], labels: labels
-        Array(pod['volume']).each do |volume|
-          emit_fs_metrics tag: "#{tag}.volume", metrics: volume, labels: labels.merge('name' => volume['name'])
-        end
-        Array(pod['containers']).each do |container|
-          emit_container_metrics labels, container
+        unless pod['startTime'].nil?
+          emit_uptime tag: tag, start_time: pod['startTime'], labels: labels
+          emit_cpu_metrics tag: tag, metrics: pod['cpu'], labels: labels if pod['cpu'] unless pod['cpu'].nil?
+          emit_memory_metrics tag: tag, metrics: pod['memory'], labels: labels if pod['memory'] unless pod['memory'].nil?
+          emit_network_metrics tag: tag, metrics: pod['network'], labels: labels unless pod['network'].nil?
+          emit_fs_metrics tag: "#{tag}.ephemeral-storage", metrics: pod['ephemeral-storage'], labels: labels unless pod['ephemeral-storage'].nil?
+          unless pod['volume'].nil?
+            Array(pod['volume']).each do |volume|
+              emit_fs_metrics tag: "#{tag}.volume", metrics: volume, labels: labels.merge('name' => volume['name'])  unless volume.nil?
+            end
+          end
+          unless pod['containers'].nil?
+            Array(pod['containers']).each do |container|
+              emit_container_metrics labels, container unless container.nil?
+            end
+          end
         end
       end
 
