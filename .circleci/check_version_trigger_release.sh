@@ -13,7 +13,7 @@ if [ $VERSION_COMMIT = $LATEST_COMMIT ];
         git checkout -b release/$VERSION origin/develop
         git push origin release/$VERSION
         git checkout master
-        git merge release/$VERSION
+        git merge --no-edit release/$VERSION
         git tag -a $VERSION -m 'Release Tag $VERSION'
         git push origin master
         git push origin --tags
