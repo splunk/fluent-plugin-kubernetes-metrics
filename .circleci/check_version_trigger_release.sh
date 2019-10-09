@@ -32,5 +32,5 @@ git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/flu
 git checkout -b dummy_master
 git merge --no-edit dummy/$VERSION
 git tag -a $VERSION -m 'Release Tag $VERSION'
-git push origin dummy_master
-git push origin --tags
+git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git dummy_master
+git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git --tags
