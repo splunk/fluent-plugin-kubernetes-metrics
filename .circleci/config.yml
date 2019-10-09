@@ -97,10 +97,10 @@ jobs:
       - checkout          
       - setup_remote_docker:
           reusable: true
-      -run:
-        name: Check VERSION file for change
-        command: |
-          .circleci/check_version_trigger_release.sh
+      - run:
+          name: Check VERSION file for change
+          command: |
+            .circleci/check_version_trigger_release.sh
 
 workflows:
   version: 2
