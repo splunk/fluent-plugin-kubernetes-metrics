@@ -86,7 +86,22 @@ jobs:
           name: Upload gem to Ruby Gem
           command: |
             .circleci/push_gems_to_rubygems.sh
-            
+
+  check_version:
+    docker:
+      - image: circleci/ruby:2.6.1-node-browsers
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout          
+      - setup_remote_docker:
+          reusable: true
+      -run:
+        name: Check VERSION file for change
+        command: |
+          .circleci/check_version_trigger_release.sh
+
 workflows:
   version: 2
   build_test_push:
@@ -101,9 +116,16 @@ workflows:
           filters:
             branches:
               only: develop
-      - release:
+      - check_version:
           requires:
-          - test
+            - push
+
+  release:
+    jobs:
+      - build:
           filters:
             branches:
               only: master
+      - release:
+          requires:
+          - build
