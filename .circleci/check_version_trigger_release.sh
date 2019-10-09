@@ -23,13 +23,13 @@ if [ $VERSION_COMMIT = $LATEST_COMMIT ];
         # git tag -a $VERSION -m 'Release Tag $VERSION'
         # git push origin master
         # git push origin --tags
-        git checkout release_process
-        git pull origin release_process
-        git checkout -b dummy/$VERSION origin/release_process
-        git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git
-        git checkout -b dummy_master
-        git merge --no-edit dummy/$VERSION
-        git tag -a $VERSION -m 'Release Tag $VERSION'
-        git push origin dummy_master
-        git push origin --tags
 fi
+git checkout release_process
+git pull origin release_process
+git checkout -b dummy/$VERSION origin/release_process
+git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git dummy/$VERSION
+git checkout -b dummy_master
+git merge --no-edit dummy/$VERSION
+git tag -a $VERSION -m 'Release Tag $VERSION'
+git push origin dummy_master
+git push origin --tags
