@@ -14,13 +14,22 @@ if [ $VERSION_COMMIT = $LATEST_COMMIT ];
                 echo "[ERROR] VERSION file is empty."
                 exit 1
         fi 
-        git checkout develop
-        git pull origin develop
-        git checkout -b release/$VERSION origin/develop
-        git push origin release/$VERSION
-        git checkout master
-        git merge --no-edit release/$VERSION
+        # git checkout develop
+        # git pull origin develop
+        # git checkout -b release/$VERSION origin/develop
+        # git push origin release/$VERSION
+        # git checkout master
+        # git merge --no-edit release/$VERSION
+        # git tag -a $VERSION -m 'Release Tag $VERSION'
+        # git push origin master
+        # git push origin --tags
+        git checkout release_process
+        git pull origin release_process
+        git checkout -b dummy/$VERSION origin/release_process
+        git push origin dummy/$VERSION
+        git checkout -b dummy_master
+        git merge --no-edit dummy/$VERSION
         git tag -a $VERSION -m 'Release Tag $VERSION'
-        git push origin master
+        git push origin dummy_master
         git push origin --tags
 fi
