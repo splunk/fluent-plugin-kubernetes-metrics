@@ -24,6 +24,7 @@ if [ $VERSION_COMMIT = $LATEST_COMMIT ];
         # git push origin master
         # git push origin --tags
 fi
+VERSION=`cat VERSION`
 git checkout release_process
 git pull origin release_process
 git checkout -b dummy/$VERSION origin/release_process
