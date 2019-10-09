@@ -129,3 +129,23 @@ workflows:
       - release:
           requires:
           - build
+
+  dummy_release_process_test:
+    jobs:
+      - build:
+          filters:
+              branches:
+                only: release_process
+      - check_version:
+          requires:
+            - build
+
+  dummy_release:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: dummy_master
+      # - release:
+      #     requires:
+      #     - build
