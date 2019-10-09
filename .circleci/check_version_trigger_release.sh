@@ -25,6 +25,8 @@ if [ $VERSION_COMMIT = $LATEST_COMMIT ];
         # git push origin --tags
 fi
 VERSION=`cat VERSION`
+git config user.email "splunk-oss-admin@splunk.com"
+git config user.name "splunk-oss-admin"
 git checkout release_process
 git pull origin release_process
 git checkout -b dummy/$VERSION origin/release_process
