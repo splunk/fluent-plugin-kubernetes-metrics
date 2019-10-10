@@ -106,7 +106,10 @@ workflows:
   version: 2
   build_test_push:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              ignore: /^release.*/
       - test:
           requires:
             - build
@@ -119,7 +122,6 @@ workflows:
       - check_version:
           requires:
             - push
-
   release:
     jobs:
       - build:
@@ -129,23 +131,3 @@ workflows:
       - release:
           requires:
           - build
-
-  dummy_release_process_test:
-    jobs:
-      - build:
-          filters:
-              branches:
-                only: release_process
-      - check_version:
-          requires:
-            - build
-
-  dummy_release:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: dummy_master
-      # - release:
-      #     requires:
-      #     - build

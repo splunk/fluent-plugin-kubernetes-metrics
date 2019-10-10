@@ -14,25 +14,13 @@ if [ $VERSION_COMMIT = $LATEST_COMMIT ];
                 echo "[ERROR] VERSION file is empty."
                 exit 1
         fi 
-        # git checkout develop
-        # git pull origin develop
-        # git checkout -b release/$VERSION origin/develop
-        # git push origin release/$VERSION
-        # git checkout master
-        # git merge --no-edit release/$VERSION
-        # git tag -a $VERSION -m 'Release Tag $VERSION'
-        # git push origin master
-        # git push origin --tags
+        git config user.email "splunk-oss-admin@splunk.com"
+        git config user.name "splunk-oss-admin"
+        git checkout develop
+        git pull origin develop
+        git checkout -b release/$VERSION origin/develop
+        git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git release/$VERSION
+        git checkout master
+        git merge --no-edit release/$VERSION
+        git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git master
 fi
-VERSION=`cat VERSION`
-git config user.email "splunk-oss-admin@splunk.com"
-git config user.name "splunk-oss-admin"
-git checkout release_process
-git pull origin release_process
-git checkout -b dummy/$VERSION origin/release_process
-git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git dummy/$VERSION
-git checkout -b dummy_master
-git merge --no-edit dummy/$VERSION
-git tag -a $VERSION -m 'Release Tag $VERSION'
-git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git dummy_master
-git push https://$RELEASE_GITHUB_USER:$RELEASE_GITHUB_PASS@github.com/splunk/fluent-plugin-kubernetes-metrics.git --tags
