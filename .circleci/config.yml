@@ -82,10 +82,10 @@ jobs:
           name: Upload gem to Github
           command: |
             .circleci/build_and_push_to_github_release.sh
-      - run:
-          name: Upload gem to Ruby Gem
-          command: |
-            .circleci/push_gems_to_rubygems.sh
+      # - run:
+      #     name: Upload gem to Ruby Gem
+      #     command: |
+      #       .circleci/push_gems_to_rubygems.sh
 
   check_version:
     docker:
