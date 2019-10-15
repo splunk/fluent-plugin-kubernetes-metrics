@@ -197,7 +197,7 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
     end
   end
 
-  sub_test_case 'metrics_cadvisor_unit_tests' do
+  test 'metrics_cadvisor_unit_tests' do
       assert_true @@hash_map_cadvisor.key?('kube.container.cpu.load.average.10s')
       assert_equal @@hash_map_cadvisor['kube.container.cpu.load.average.10s'], @@hash_map_test['kube.container.cpu.load.average.10s'][2]['value']
 
