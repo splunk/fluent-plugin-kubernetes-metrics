@@ -198,265 +198,163 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
   end
 
   sub_test_case 'metrics_cadvisor_unit_tests' do
-    test 'Test - metrics cadvisor: container_cpu_load_average_10s' do
       assert_true @@hash_map_cadvisor.key?('kube.container.cpu.load.average.10s')
       assert_equal @@hash_map_cadvisor['kube.container.cpu.load.average.10s'], @@hash_map_test['kube.container.cpu.load.average.10s'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_cpu_system_seconds_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.cpu.system.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.cpu.system.seconds.total'], @@hash_map_test['kube.container.cpu.system.seconds.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_cpu_usage_seconds_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.cpu.usage.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.cpu.usage.seconds.total'], @@hash_map_test['kube.container.cpu.usage.seconds.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_cpu_user_seconds_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.cpu.user.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.cpu.user.seconds.total'], @@hash_map_test['kube.container.cpu.user.seconds.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_inodes_free' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.inodes.free')
       assert_equal @@hash_map_cadvisor['kube.container.fs.inodes.free'], @@hash_map_test['kube.container.fs.inodes.free'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_inodes_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.inodes.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.inodes.total'], @@hash_map_test['kube.container.fs.inodes.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_io_current' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.io.current')
       assert_equal @@hash_map_cadvisor['kube.container.fs.io.current'], @@hash_map_test['kube.container.fs.io.current'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_io_time_seconds_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.io.time.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.io.time.seconds.total'], @@hash_map_test['kube.container.fs.io.time.seconds.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_io_time_weighted_seconds_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.io.time.weighted.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.io.time.weighted.seconds.total'], @@hash_map_test['kube.container.fs.io.time.weighted.seconds.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_limit_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.limit.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.fs.limit.bytes'], @@hash_map_test['kube.container.fs.limit.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_read_seconds_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.read.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.read.seconds.total'], @@hash_map_test['kube.container.fs.read.seconds.total'][2]['value']
-    end
 
     # TODO: Current Test does not work - metric present in metrics_cadvisor.txt but not being parsed by connector in test/working in production
-    test 'Test - metrics cadvisor: container_fs_reads_bytes_total' do
       assert_false @@hash_map_cadvisor.key?('kube.container.fs.reads.bytes.total')
       # assert_equal @@hash_map_cadvisor['kube.container.fs.reads.bytes.total'], @@hash_map_test["kube.container.fs.reads.bytes.total"][2]["value"]
-    end
 
-    test 'Test - metrics cadvisor: container_fs_reads_merged_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.reads.merged.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.reads.merged.total'], @@hash_map_test['kube.container.fs.reads.merged.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_reads_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.reads.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.reads.total'], @@hash_map_test['kube.container.fs.reads.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_sector_reads_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.sector.reads.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.sector.reads.total'], @@hash_map_test['kube.container.fs.sector.reads.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_sector_writes_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.sector.writes.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.sector.writes.total'], @@hash_map_test['kube.container.fs.sector.writes.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_usage_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.usage.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.fs.usage.bytes'], @@hash_map_test['kube.container.fs.usage.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_fs_write_seconds_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.write.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.write.seconds.total'], @@hash_map_test['kube.container.fs.write.seconds.total'][2]['value']
-    end
 
     # TODO: Current Test does not work - metric present in metrics_cadvisor.txt but not being parsed by connector in test/working in production
-    test 'Test - metrics cadvisor: container_fs_writes_bytes_total' do
       assert_false @@hash_map_cadvisor.key?('kube.container.fs.writes.bytes.total')
       # assert_equal @@hash_map_cadvisor['kube.container.fs.writes.bytes.total'], @@hash_map_test["kube.container.fs.writes.bytes.total"][2]["value"]
-    end
 
-    test 'Test - metrics cadvisor: container_fs_writes_merged_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.writes.merged.total')
       # assert_equal @@hash_map_cadvisor['kube.container.fs.writes.merged.total'], @@hash_map_test["kube.container.fs.writes.merged.total"][2]["value"]
-    end
 
-    test 'Test - metrics cadvisor: container_fs_writes_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.writes.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.writes.total'], @@hash_map_test['kube.container.fs.writes.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_last_seen' do
       assert_true @@hash_map_cadvisor.key?('kube.container.last.seen')
       assert_equal @@hash_map_cadvisor['kube.container.last.seen'], @@hash_map_test['kube.container.last.seen'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_cache' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.cache')
       assert_equal @@hash_map_cadvisor['kube.container.memory.cache'], @@hash_map_test['kube.container.memory.cache'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_failcnt' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.failcnt')
       assert_equal @@hash_map_cadvisor['kube.container.memory.failcnt'], @@hash_map_test['kube.container.memory.failcnt'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_failures_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.failures.total')
       assert_equal @@hash_map_cadvisor['kube.container.memory.failures.total'], @@hash_map_test['kube.container.memory.failures.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_max_usage_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.max.usage.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.memory.max.usage.bytes'], @@hash_map_test['kube.container.memory.max.usage.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_rss' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.rss')
       assert_equal @@hash_map_cadvisor['kube.container.memory.rss'], @@hash_map_test['kube.container.memory.rss'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_swap' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.swap')
       assert_equal @@hash_map_cadvisor['kube.container.memory.swap'], @@hash_map_test['kube.container.memory.swap'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_usage_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.usage.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.memory.usage.bytes'], @@hash_map_test['kube.container.memory.usage.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_memory_working_set_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.memory.working.set.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.memory.working.set.bytes'], @@hash_map_test['kube.container.memory.working.set.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_receive_bytes_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.receive.bytes.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.receive.bytes.total'], @@hash_map_test['kube.container.network.receive.bytes.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_receive_errors_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.receive.errors.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.receive.errors.total'], @@hash_map_test['kube.container.network.receive.errors.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_receive_packets_dropped_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.receive.packets.dropped.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.receive.packets.dropped.total'], @@hash_map_test['kube.container.network.receive.packets.dropped.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_receive_packets_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.receive.packets.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.receive.packets.total'], @@hash_map_test['kube.container.network.receive.packets.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_tcp_usage_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.tcp.usage.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.tcp.usage.total'], @@hash_map_test['kube.container.network.tcp.usage.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_transmit_bytes_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.transmit.bytes.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.transmit.bytes.total'], @@hash_map_test['kube.container.network.transmit.bytes.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_transmit_errors_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.transmit.errors.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.transmit.errors.total'], @@hash_map_test['kube.container.network.transmit.errors.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_transmit_packets_dropped_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.transmit.packets.dropped.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.transmit.packets.dropped.total'], @@hash_map_test['kube.container.network.transmit.packets.dropped.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_transmit_packets_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.transmit.packets.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.transmit.packets.total'], @@hash_map_test['kube.container.network.transmit.packets.total'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_network_udp_usage_total' do
       assert_true @@hash_map_cadvisor.key?('kube.container.network.udp.usage.total')
       assert_equal @@hash_map_cadvisor['kube.container.network.udp.usage.total'], @@hash_map_test['kube.container.network.udp.usage.total'][2]['value']
-    end
 
     # TODO: Current Test does not work - metric present in metrics_cadvisor.txt but not being parsed by connector
-    test 'Test - metrics cadvisor: container_scrape_error' do
       assert_false @@hash_map_cadvisor.key?('kube.container.scrape.error')
       # assert_equal @@hash_map_cadvisor['kube.container.scrape.error'], @@hash_map_test["kube.container.scrape.error"][2]["value"]
-    end
 
-    test 'Test - metrics cadvisor: container_spec_cpu_period' do
       assert_true @@hash_map_cadvisor.key?('kube.container.spec.cpu.period')
       assert_equal @@hash_map_cadvisor['kube.container.spec.cpu.period'], @@hash_map_test['kube.container.spec.cpu.period'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_spec_cpu_shares' do
       assert_true @@hash_map_cadvisor.key?('kube.container.spec.cpu.shares')
       assert_equal @@hash_map_cadvisor['kube.container.spec.cpu.shares'], @@hash_map_test['kube.container.spec.cpu.shares'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_spec_memory_limit_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.spec.memory.limit.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.spec.memory.limit.bytes'], @@hash_map_test['kube.container.spec.memory.limit.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_spec_memory_reservation_limit_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.spec.memory.reservation.limit.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.spec.memory.reservation.limit.bytes'], @@hash_map_test['kube.container.spec.memory.reservation.limit.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_spec_memory_swap_limit_bytes' do
       assert_true @@hash_map_cadvisor.key?('kube.container.spec.memory.swap.limit.bytes')
       assert_equal @@hash_map_cadvisor['kube.container.spec.memory.swap.limit.bytes'], @@hash_map_test['kube.container.spec.memory.swap.limit.bytes'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_start_time_seconds' do
       assert_true @@hash_map_cadvisor.key?('kube.container.start.time.seconds')
       assert_equal @@hash_map_cadvisor['kube.container.start.time.seconds'], @@hash_map_test['kube.container.start.time.seconds'][2]['value']
-    end
 
-    test 'Test - metrics cadvisor: container_tasks_state' do
       assert_true @@hash_map_cadvisor.key?('kube.container.tasks.state')
       assert_equal @@hash_map_cadvisor['kube.container.tasks.state'], @@hash_map_test['kube.container.tasks.state'][2]['value']
-    end
 
     # TODO: Current Test does not work - metric present in metrics_cadvisor.txt but not being parsed by connector
-    test 'Test - metrics cadvisor: machine_cpu_cores' do
       assert_false @@hash_map_cadvisor.key?('kube.machine.cpu.cores')
       # assert_equal @@hash_map_cadvisor['kube.machine.cpu.cores'], @@hash_map_test["kube.machine.cpu.cores"][2]["value"]
-    end
 
     # TODO: Current Test does not work - metric present in metrics_cadvisor.txt but not being parsed by connector
-    test 'Test - metrics cadvisor: machine_memory_bytes' do
       assert_false @@hash_map_cadvisor.key?('kube.container.machine.memory.bytes')
       # assert_equal @@hash_map_cadvisor['kube.container.machine.memory.bytes'], @@hash_map_test["kube.container.machine.memory.bytes"][2]["value"]
-    end
 
     # TODO: Test does not work - metric not present in metrics_cadvisor.txt
-    test 'Test - metrics cadvisor: container_cpu_cfs_throttled_seconds_total' do
       assert_false @@hash_map_cadvisor.key?('kube.container.cpu.cfs.throttled.seconds.total')
       # assert_equal @@hash_map_cadvisor['kube.container.cpu.cfs.throttled.seconds.total'], @@hash_map_test["kube.container.cpu.cfs.throttled.seconds.total"][2]["value"]
-    end
   end
 end
