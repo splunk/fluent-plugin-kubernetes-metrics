@@ -43,6 +43,7 @@ jobs:
   func_test:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
+    working_directory: ~/repo
     steps:
       - run:
           name: trigger
