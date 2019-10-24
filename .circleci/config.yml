@@ -31,7 +31,7 @@ jobs:
           at: /tmp
       - checkout
       - setup_remote_docker:
-           reusable: true
+          reusable: true
       - run:
           name: Install dependencies
           command: |
@@ -45,6 +45,9 @@ jobs:
       - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
     steps:
+      - checkout
+      - setup_remote_docker:
+          reusable: true
       - run:
           name: trigger
           command: |
