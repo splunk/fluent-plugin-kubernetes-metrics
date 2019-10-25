@@ -23,7 +23,7 @@ DONE="FALSE"
 until [TIMEOUT -lt 0 || "$DONE" == "TRUE" ]; do
     curl https://circleci.com/api/v1.1/project/github/$ORGANIZATION/$PROJECT/$BUILD_NUM?circle-token=$CIRCLE_TOKEN >build_progress.json
     STATUS=$(jq -r .status build_progress.json)
-    if [$"STATUS" != "running"]; then
+    if [ "$STATUS" != "running" ]; then
         DONE="TRUE"
     else
         let TIMEOUT--
