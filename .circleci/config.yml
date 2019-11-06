@@ -22,7 +22,7 @@ jobs:
           paths:
             - pkg
 
-  test:
+  unit_test:
     docker:
        - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
@@ -31,7 +31,7 @@ jobs:
           at: /tmp
       - checkout
       - setup_remote_docker:
-           reusable: true
+          reusable: true
       - run:
           name: Install dependencies
           command: |
@@ -40,26 +40,18 @@ jobs:
           name: Run unit tests
           command: |
             rake test -t -v
-
-  push:
+  func_test:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
     steps:
-      - attach_workspace:
-          at: /tmp
       - checkout
       - setup_remote_docker:
           reusable: true
       - run:
-          name: Push rubygem to s3
+          name: trigger
           command: |
-            .circleci/push_gem.sh
-      - run:
-          name: Build and push docker image to ecr
-          command: |
-            .circleci/build_and_push.sh
-
+            .circleci/trigger_func_test.sh
   release:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
@@ -109,25 +101,27 @@ workflows:
       - build:
           filters:
             branches:
-              ignore: /^release\/.*/
-      - test:
+              ignore: 
+                - /^release\/.*/
+                - master
+      - unit_test:
           requires:
             - build
-      - push:
+      - func_test:
           requires:
-            - test
-          filters:
-            branches:
-              only: develop
+            - unit_test
       - check_version:
           requires:
-            - push
+            - unit_test
   release:
     jobs:
       - build:
           filters:
             branches:
               only: master
+      - unit_test:
+          requires:
+            - build
       - release:
           requires:
-          - build
+          - unit_test
