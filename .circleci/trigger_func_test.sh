@@ -4,7 +4,7 @@
 # to working version of every other component.
 ORGANIZATION=splunk
 PROJECT=splunk-connect-for-kubernetes
-BRANCH=master
+BRANCH=$1
 
 # Trigger functional test
 curl -X POST --header "Content-Type: application/json" \
