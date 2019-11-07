@@ -40,7 +40,7 @@ jobs:
           name: Run unit tests
           command: |
             rake test -t -v
-            
+
   func_test_master:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
@@ -131,6 +131,9 @@ workflows:
           requires:
             - func_test_master
             - func_test_develop
+          filters:
+            branches:
+              only: develop
   release:
     jobs:
       - build:
