@@ -40,7 +40,8 @@ jobs:
           name: Run unit tests
           command: |
             rake test -t -v
-  func_test:
+
+  func_test_master:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
@@ -51,7 +52,20 @@ jobs:
       - run:
           name: trigger
           command: |
-            .circleci/trigger_func_test.sh
+            .circleci/trigger_func_test.sh master
+
+  func_test_develop:
+    docker:
+      - image: circleci/ruby:2.6.1-node-browsers
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker:
+          reusable: true
+      - run:
+          name: trigger
+          command: |
+            .circleci/trigger_func_test.sh develop
   release:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
@@ -107,12 +121,19 @@ workflows:
       - unit_test:
           requires:
             - build
-      - func_test:
+      - func_test_master:
+          requires:
+            - unit_test
+      - func_test_develop:
           requires:
             - unit_test
       - check_version:
           requires:
-            - unit_test
+            - func_test_master
+            - func_test_develop
+          filters:
+            branches:
+              only: develop
   release:
     jobs:
       - build:
@@ -122,6 +143,13 @@ workflows:
       - unit_test:
           requires:
             - build
+      - func_test_master:
+          requires:
+            - unit_test
+      - func_test_develop:
+          requires:
+            - unit_test
       - release:
           requires:
-          - unit_test
+            - func_test_master
+            - func_test_develop
