@@ -19,14 +19,14 @@ USER root
 COPY *.gem /tmp/
 COPY licenses /licenses
 
-RUN gem install -N fluentd:1.4.0 \
-       fluent-plugin-prometheus:1.3.0 \
-       fluent-plugin-record-modifier:2.0.1 \
+RUN gem install -N fluentd:1.9.1 \
+       fluent-plugin-prometheus:1.7.0 \
+       fluent-plugin-record-modifier:2.1.0 \
        fluent-plugin-splunk-hec:${VERSION} \
-       oj:3.7.9 \
-       multi_json:1.13.1 \
-       bigdecimal:1.4.3 \
-       kubeclient:4.3.0 && \
+       oj:3.10.2 \
+       multi_json:1.14.1 \
+       bigdecimal:2.0.0 \
+       kubeclient:4.6.0 && \
     gem install -N /tmp/*.gem
 
 RUN groupadd -r $FLUENT_USER && \
