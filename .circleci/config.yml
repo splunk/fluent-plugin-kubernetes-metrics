@@ -129,8 +129,7 @@ workflows:
             - unit_test
       - check_version:
           requires:
-            - func_test_master
-            - func_test_develop
+            - unit_test
           filters:
             branches:
               only: develop
@@ -151,5 +150,4 @@ workflows:
             - unit_test
       - release:
           requires:
-            - func_test_master
-            - func_test_develop
+            - unit_test
