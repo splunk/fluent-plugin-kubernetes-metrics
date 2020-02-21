@@ -2,15 +2,16 @@ FROM registry.access.redhat.com/ubi8/ruby-25
 
 MAINTAINER DataEdge DataEdge@splunk.com
 
+ARG VERSION
+
 LABEL name="Splunk Connect for Kubernetes Metrics container" \
       maintainer="DataEdge@splunk.com" \
       vendor="Splunk Inc." \
-      version="1.1.3" \
-      release="1.1.3" \
+      version=${VERSION} \
+      release=${VERSION} \
       summary="Splunk Connect for Kubernetes Metrics container" \
       description="Splunk Connect for Kubernetes Metrics container"
 
-ARG VERSION
 ENV VERSION=${VERSION}
 ENV FLUENT_USER fluent
 
@@ -21,7 +22,7 @@ COPY licenses /licenses
 
 COPY Gemfile* ./
 RUN gem install bundler \
-   && bundle add fluent-plugin-splunk-hec -v ${VERSION} \
+   && bundle install \
    && bundle exec gem install /tmp/*.gem
 
 RUN groupadd -r $FLUENT_USER && \
