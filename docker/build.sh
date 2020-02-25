@@ -9,7 +9,7 @@ bundle install
 
 # Build Gem
 bundle exec rake build -t -v
-cp pkg/fluent-plugin-kubernetes-objects-*.gem docker
+cp pkg/fluent-plugin-kubernetes-metrics-*.gem docker
 
 # Build Docker Image
 VERSION=`cat VERSION`

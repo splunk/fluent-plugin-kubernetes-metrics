@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 echo "Building docker image..."
-cp /tmp/pkg/fluent-plugin-kubernetes-objects-*.gem docker
+cp /tmp/pkg/fluent-plugin-kubernetes-metrics-*.gem docker
 VERSION=`cat VERSION`
 echo "Copying licenses to be included in the docker image..."
 mkdir docker/licenses
