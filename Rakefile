@@ -23,6 +23,6 @@ namespace :docker do
   task :build, [:tag] => :build do |_t, args|
     raise 'Argument `tag` was not provided.' unless args.tag
 
-    sh "docker build --build-arg VERSION=$(cat VERSION) --no-cache -t splunk/connect-for-kubernetes:#{args.tag} -f docker/Dockerfile ."
+    sh "docker build --build-arg VERSION=$(cat VERSION) --no-cache -t splunk/connect-for-kubernetes:#{args.tag} ./docker"
   end
 end

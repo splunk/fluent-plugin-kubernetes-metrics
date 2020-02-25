@@ -17,18 +17,18 @@ ENV FLUENT_USER fluent
 
 USER root
 
-COPY lib/fluent/plugin/*.rb /tmp/
-COPY LICENSE /licenses/
+COPY *.gem /tmp/
+COPY licenses /licenses
 
-COPY docker/Gemfile* ./
+COPY Gemfile* ./
 RUN gem install bundler \
+   && gem unpack /tmp/*.gem --target gem \
    && bundle install 
 
 RUN groupadd -r $FLUENT_USER && \
   useradd -r -g $FLUENT_USER $FLUENT_USER && \
-  mkdir -p /fluentd/log fluentd/etc /fluentd/plugins && \
-  cp /tmp/*.rb /fluentd/plugins/ && \
+  mkdir -p /fluentd/log /fluentd/etc /fluentd/plugins && \
   chown -R $FLUENT_USER /fluentd && chgrp -R $FLUENT_USER /fluentd
 
 USER $FLUENT_USER
-CMD exec fluentd -p /fluentd/plugins -c /fluentd/etc/fluent.conf
+CMD bundle exec fluentd -c /fluentd/etc/fluent.conf

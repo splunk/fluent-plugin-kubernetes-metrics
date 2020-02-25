@@ -4,6 +4,7 @@ pkg
 coverage/
 .idea/
 docker/gems/
+docker/gem/
 docker/licenses/
 /.bundle/
 docker/.bundle/

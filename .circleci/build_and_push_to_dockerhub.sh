@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -e
-
+echo "Building docker image..."
+cp /tmp/pkg/fluent-plugin-kubernetes-objects-*.gem docker
 VERSION=`cat VERSION`
-docker build --build-arg VERSION=$VERSION --no-cache -t splunk/fluent-plugin-kubernetes-metrics:ci -f docker/Dockerfile .
+echo "Copying licenses to be included in the docker image..."
+mkdir docker/licenses
+cp -rp LICENSE docker/licenses/
+docker build --build-arg VERSION=$VERSION --no-cache -t splunk/fluent-plugin-kubernetes-metrics:ci ./docker
 docker tag splunk/fluent-plugin-kubernetes-metrics:ci splunk/${DOCKERHUB_REPO_NAME}:${VERSION}
 docker tag splunk/fluent-plugin-kubernetes-metrics:ci splunk/${DOCKERHUB_REPO_NAME}:latest
 echo "Push docker image to splunk dockerhub..."
