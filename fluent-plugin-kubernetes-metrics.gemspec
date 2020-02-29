@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = Dir.glob('test/**/**.rb')
   spec.require_paths = ['lib']
   spec.add_development_dependency 'bundler', '~> 2.0'
-  spec.add_development_dependency 'rake', '~> 12.0'
+  spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'simplecov', '~> 0.16.1'
   spec.add_development_dependency 'test-unit', '~> 3.3.0'
   spec.add_development_dependency 'webmock', '~> 3.5.1'
