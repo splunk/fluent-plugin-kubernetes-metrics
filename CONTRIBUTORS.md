@@ -2,7 +2,7 @@
 
 Fluentd Plugin for Kubernetes Metrics is developed by Splunkers and the open-source community.
 
-We thank all of our [contributors](https://github.com/splunk/fluent-plugin-kubernetes-objects/graphs/contributors)!
+We thank all of our [contributors](https://github.com/splunk/fluent-plugin-kubernetes-metrics/graphs/contributors)!
 
 **For the detailed history of contributions** of a given file, try
 
