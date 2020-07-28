@@ -202,11 +202,11 @@ module Fluent
         if env_host && env_port
           if @use_rest_client_ssl
             @kubelet_url = "https://#{env_host}:#{env_port}/stats/summary"
-            @kubelet_url_stats = "https://#{env_host}:#{env_port}/stats/"
+            @kubelet_url_stats = "https://#{env_host}:#{env_port}/stats"
             @cadvisor_url = "https://#{env_host}:#{env_port}/metrics/cadvisor"
           else
             @kubelet_url = "http://#{env_host}:#{env_port}/stats/summary"
-            @kubelet_url_stats = "http://#{env_host}:#{env_port}/stats/"
+            @kubelet_url_stats = "http://#{env_host}:#{env_port}/stats"
             @cadvisor_url = "http://#{env_host}:#{env_port}/metrics/cadvisor"
           end
         end
@@ -275,7 +275,7 @@ module Fluent
         @stats_api =
           begin
             @client.discover unless @client.discovered
-            @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/stats/"].tap do |endpoint|
+            @client.rest_client["/nodes/#{node}:#{@kubelet_port}/proxy/stats"].tap do |endpoint|
               log.info("Use URL #{endpoint.url} for scraping stats metrics")
             end
           end
