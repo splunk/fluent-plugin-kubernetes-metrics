@@ -3,3 +3,8 @@ vendor
 pkg
 coverage/
 .idea/
+docker/gems/
+docker/licenses/
+docker/gem/
+/.bundle/
+docker/.bundle/

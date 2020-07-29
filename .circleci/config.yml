@@ -22,7 +22,7 @@ jobs:
           paths:
             - pkg
 
-  test:
+  unit_test:
     docker:
        - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
@@ -31,7 +31,7 @@ jobs:
           at: /tmp
       - checkout
       - setup_remote_docker:
-           reusable: true
+          reusable: true
       - run:
           name: Install dependencies
           command: |
@@ -39,68 +39,33 @@ jobs:
       - run:
           name: Run unit tests
           command: |
-            rake test -t -v
+            bundle exec rake test -t -v
 
-  push:
+  func_test_master:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
     steps:
-      - attach_workspace:
-          at: /tmp
       - checkout
       - setup_remote_docker:
           reusable: true
       - run:
-          name: Push rubygem to s3
+          name: trigger
           command: |
-            .circleci/push_gem.sh
-      - run:
-          name: Build and push docker image to ecr
-          command: |
-            .circleci/build_and_push.sh
+            .circleci/trigger_func_test.sh master
 
-  release:
+  func_test_develop:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
     steps:
-      - attach_workspace:
-          at: /tmp
       - checkout
       - setup_remote_docker:
           reusable: true
       - run:
-          name: Install dependencies
+          name: trigger
           command: |
-            .circleci/install_dep.sh
-      - run:
-          name: Build and push docker image to dockerhub
-          command: |
-            .circleci/build_and_push_to_dockerhub.sh
-      - run:
-          name: Upload gem to Github
-          command: |
-            .circleci/build_and_push_to_github_release.sh
-      - run:
-          name: Upload gem to Ruby Gem
-          command: |
-            .circleci/push_gems_to_rubygems.sh
-
-  check_version:
-    docker:
-      - image: circleci/ruby:2.6.1-node-browsers
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - checkout          
-      - setup_remote_docker:
-          reusable: true
-      - run:
-          name: Check VERSION file for change
-          command: |
-            .circleci/check_version_trigger_release.sh
+            .circleci/trigger_func_test.sh develop
 
 workflows:
   version: 2
@@ -109,25 +74,15 @@ workflows:
       - build:
           filters:
             branches:
-              ignore: /^release\/.*/
-      - test:
+              ignore: 
+                - /^release\/.*/
+                - master
+      - unit_test:
           requires:
             - build
-      - push:
+      - func_test_master:
           requires:
-            - test
-          filters:
-            branches:
-              only: develop
-      - check_version:
+            - unit_test
+      - func_test_develop:
           requires:
-            - push
-  release:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: master
-      - release:
-          requires:
-          - build
+            - unit_test

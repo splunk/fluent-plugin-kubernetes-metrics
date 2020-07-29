@@ -34,7 +34,7 @@ module PluginTestHelper
   end
 
   def kubelet_stats_api_url
-    'http://generics-aws-node-name:10255/stats/'
+    'http://generics-aws-node-name:10255/stats'
   end
 
   def kubelet_cadvisor_api_url
@@ -113,7 +113,7 @@ module PluginTestHelper
 
   def stub_metrics_proxy_stats
     open(File.expand_path('stats.json', __dir__)).tap do |f|
-      stub_request(:get, "#{k8s_url}/v1/nodes/generics-aws-node-name:10255/proxy/stats/")
+      stub_request(:get, "#{k8s_url}/v1/nodes/generics-aws-node-name:10255/proxy/stats")
         .to_return(body: f.read)
     end.close
   end
