@@ -41,7 +41,7 @@ jobs:
           command: |
             bundle exec rake test -t -v
 
-  func_test_master:
+  func_test_main:
     docker:
       - image: circleci/ruby:2.6.1-node-browsers
     working_directory: ~/repo
@@ -52,7 +52,7 @@ jobs:
       - run:
           name: trigger
           command: |
-            .circleci/trigger_func_test.sh master
+            .circleci/trigger_func_test.sh main
 
   func_test_develop:
     docker:
@@ -76,11 +76,11 @@ workflows:
             branches:
               ignore: 
                 - /^release\/.*/
-                - master
+                - main
       - unit_test:
           requires:
             - build
-      - func_test_master:
+      - func_test_main:
           requires:
             - unit_test
       - func_test_develop:
