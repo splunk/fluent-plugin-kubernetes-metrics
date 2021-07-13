@@ -1,7 +1,6 @@
 FROM registry.access.redhat.com/ubi8/ruby-27
 
 ARG VERSION
-ARG NODEJS_VERSION
 
 LABEL name="Splunk Connect for Kubernetes Metrics container" \
       maintainer="DataEdge@splunk.com" \
@@ -21,9 +20,7 @@ COPY licenses /licenses
 
 COPY Gemfile* ./
 RUN yum update -y \
-   && npm install -g n \
-   && yum remove -y nodejs \
-   && n ${NODEJS_VERSION} \
+   && yum remove -y nodejs npm \
    && gem install bundler \
    && gem unpack /tmp/*.gem --target gem \
    && bundle install 
