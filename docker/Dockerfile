@@ -23,7 +23,8 @@ RUN yum update -y \
    && yum remove -y nodejs npm \
    && gem install bundler \
    && gem unpack /tmp/*.gem --target gem \
-   && bundle install 
+   && bundle install \
+   && rpm -e --nodeps python3-pip-wheel
 
 RUN groupadd -r $FLUENT_USER && \
   useradd -r -g $FLUENT_USER $FLUENT_USER && \
