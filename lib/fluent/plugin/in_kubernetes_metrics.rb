@@ -90,8 +90,12 @@ module Fluent
         super
 
         timer_execute :metric_scraper, @interval, &method(:scrape_metrics)
-        timer_execute :stats_metric_scraper, @interval, &method(:scrape_stats_metrics)
         timer_execute :cadvisor_metric_scraper, @interval, &method(:scrape_cadvisor_metrics)
+        if is_stats_endpoint_available?
+          timer_execute :stats_metric_scraper, @interval, &method(:scrape_stats_metrics)
+        else
+          log.info "'/stats' endpoint is not available"
+        end
       end
 
       def close
@@ -642,6 +646,20 @@ module Fluent
         end
       end
 
+      def is_stats_endpoint_available?
+        if @use_rest_client
+          response_stats = RestClient::Request.execute request_options_stats
+        else
+          @node_names.each do |node|
+            @node_name = node
+            response_stats = stats_proxy_api(node).get(@client.headers)
+          end
+        end
+        true
+        rescue
+          false
+      end
+      
       def scrape_stats_metrics
         if @use_rest_client
           response_stats = RestClient::Request.execute request_options_stats
