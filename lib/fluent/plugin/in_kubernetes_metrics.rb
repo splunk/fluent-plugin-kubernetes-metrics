@@ -90,8 +90,13 @@ module Fluent
         super
 
         timer_execute :metric_scraper, @interval, &method(:scrape_metrics)
-        timer_execute :stats_metric_scraper, @interval, &method(:scrape_stats_metrics)
         timer_execute :cadvisor_metric_scraper, @interval, &method(:scrape_cadvisor_metrics)
+        # It is done to optionally fetch from 'stats' for k8s version <1.21
+        if is_stats_endpoint_available?
+          timer_execute :stats_metric_scraper, @interval, &method(:scrape_stats_metrics)
+        else
+          log.info "'/stats' endpoint is not available. It has been deprecated since k8s v1.15, disabled since v1.18, and removed in v1.21 and onwards"
+        end
       end
 
       def close
@@ -640,6 +645,20 @@ module Fluent
             handle_response(response)
           end
         end
+      end
+
+      def is_stats_endpoint_available?
+        if @use_rest_client
+          response_stats = RestClient::Request.execute request_options_stats
+        else
+          @node_names.each do |node|
+            @node_name = node
+            response_stats = stats_proxy_api(node).get(@client.headers)
+          end
+        end
+        true
+        rescue RestClient::NotFound
+          false
       end
 
       def scrape_stats_metrics
