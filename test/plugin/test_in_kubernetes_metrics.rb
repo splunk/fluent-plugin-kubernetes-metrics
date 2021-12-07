@@ -35,6 +35,7 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
   ).freeze
 
   setup do
+    return unless @@hash_map_test.empty?
     Fluent::Test.setup
 
     @@parsed_unit_string = JSON.parse(get_unit_parsed_string)
@@ -56,8 +57,10 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
     metrics = get_cadvisor_parsed_string.split("\n")
     metrics.each do |metric|
       next unless metric.include? 'container_name='
+      next unless  metric[0] != '#'
 
-      next unless metric.match(/^((?!container_name="").)*$/) && metric[0] != '#'
+      container_name = metric.match(/container_name="\S*"/).to_s
+      container_name = container_name.split('"')[1]
 
       metric_str, metric_val = metric.split(' ')
       metric_val = metric_val.to_f if metric_val.is_a? String
@@ -70,13 +73,11 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       namespace = metric.match(/namespace="\S*"/).to_s
       namespace = namespace.split('"')[1]
       metric_labels = { 'pod_name' => pod_name, 'image' => image_name, 'namespace' => namespace, 'value' => metric_val, 'node' => @node_name }
-      if metric =~ /^((?!container_name="POD").)*$/
+      if container_name == 'POD'
         tag = 'pod'
         tag = generate_tag("#{tag}#{metric_name.tr('_', '.')}", @@driver.instance.tag)
         tag = tag.gsub('container', '')
       else
-        container_name = metric.match(/container_name="\S*"/).to_s
-        container_name = container_name.split('"')[1]
         container_label = { 'container_name' => container_name }
         metric_labels.merge(container_label)
         tag = generate_tag(metric_name.tr('_', '.').to_s, @@driver.instance.tag)
@@ -252,11 +253,10 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       assert_true @@hash_map_cadvisor.key?('kube.container.fs.read.seconds.total')
       assert_equal @@hash_map_cadvisor['kube.container.fs.read.seconds.total'], @@hash_map_test['kube.container.fs.read.seconds.total'][2]['value']
     end
-
-    # TODO: Current Test does not work - metric present in metrics_cadvisor.txt but not being parsed by connector in test/working in production
+    
     test 'Test - metrics cadvisor: container_fs_reads_bytes_total' do
-      assert_false @@hash_map_cadvisor.key?('kube.container.fs.reads.bytes.total')
-      # assert_equal @@hash_map_cadvisor['kube.container.fs.reads.bytes.total'], @@hash_map_test["kube.container.fs.reads.bytes.total"][2]["value"]
+      assert_true @@hash_map_cadvisor.key?('kube.container.fs.reads.bytes.total')
+      assert_equal @@hash_map_cadvisor['kube.container.fs.reads.bytes.total'], @@hash_map_test["kube.container.fs.reads.bytes.total"][2]["value"]
     end
 
     test 'Test - metrics cadvisor: container_fs_reads_merged_total' do
@@ -289,10 +289,9 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       assert_equal @@hash_map_cadvisor['kube.container.fs.write.seconds.total'], @@hash_map_test['kube.container.fs.write.seconds.total'][2]['value']
     end
 
-    # TODO: Current Test does not work - metric present in metrics_cadvisor.txt but not being parsed by connector in test/working in production
     test 'Test - metrics cadvisor: container_fs_writes_bytes_total' do
-      assert_false @@hash_map_cadvisor.key?('kube.container.fs.writes.bytes.total')
-      # assert_equal @@hash_map_cadvisor['kube.container.fs.writes.bytes.total'], @@hash_map_test["kube.container.fs.writes.bytes.total"][2]["value"]
+      assert_true @@hash_map_cadvisor.key?('kube.container.fs.writes.bytes.total')
+      assert_equal @@hash_map_cadvisor['kube.container.fs.writes.bytes.total'], @@hash_map_test["kube.container.fs.writes.bytes.total"][2]["value"]
     end
 
     test 'Test - metrics cadvisor: container_fs_writes_merged_total' do
