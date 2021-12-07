@@ -602,33 +602,34 @@ module Fluent
         emit_stats_breakdown(metrics['stats']) unless metrics['stats'].nil?
       end
 
+      # Make sure regex has only one capturing group
+      def grep_using_regex(metric, regex)
+        match = metric.match(regex)
+        return nil if match.nil?
+        match[1]
+      end
+
       def emit_cadvisor_metrics(metrics)
         metrics = metrics.split("\n")
         metrics.each do |metric|
-          next unless metric.include? 'container_name='
-
-          next unless metric.match(/^((?!container_name="").)*$/) && metric[0] != '#'
-
+          
+          next if metric[0] == '#' or not container_name = grep_using_regex(metric, /container(?:_name)?="([^"]*)"/)
+          
           metric_str, metric_val = metric.split(' ')
           metric_val = metric_val.to_f if metric_val.is_a? String
           first_occur = metric_str.index('{')
           metric_name = metric_str[0..first_occur - 1]
-          pod_name = metric.match(/pod_name="\S*"/).to_s
-          pod_name = pod_name.split('"')[1]
-          image_name = metric.match(/image="\S*"/).to_s
-          image_name = image_name.split('"')[1]
-          namespace = metric.match(/namespace="\S*"/).to_s
-          namespace = namespace.split('"')[1]
+          pod_name = grep_using_regex(metric, /pod(?:_name)?="([^"]*)"/).to_s
+          image_name = grep_using_regex(metric, /image="([^"]*)"/).to_s
+          namespace = grep_using_regex(metric, /namespace="([^"]*)"/).to_s
           metric_labels = { 'pod_name' => pod_name, 'image' => image_name, 'namespace' => namespace, 'value' => metric_val, 'node' => @node_name }
-          if metric =~ /^((?!container_name="POD").)*$/
+          if container_name=="POD"
             tag = 'pod'
             tag = generate_tag("#{tag}#{metric_name.tr('_', '.')}")
             tag = tag.gsub('container', '')
           else
-            container_name = metric.match(/container_name="\S*"/).to_s
-            container_name = container_name.split('"')[1]
             container_label = { 'container_name' => container_name }
-            metric_labels.merge(container_label)
+            metric_labels.merge!(container_label)
             tag = generate_tag(metric_name.tr('_', '.').to_s)
           end
           router.emit tag, @scraped_at_cadvisor, metric_labels
