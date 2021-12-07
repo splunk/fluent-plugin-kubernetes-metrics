@@ -35,6 +35,8 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
   ).freeze
 
   setup do
+    stub_k8s_requests
+
     return unless @@hash_map_test.empty?
     Fluent::Test.setup
 
@@ -45,8 +47,6 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
     open(File.expand_path('../metrics_cadvisor.txt', __dir__)).tap do |f|
       get_cadvisor_parsed_string = f.read
     end.close
-
-    stub_k8s_requests
 
     @@ca_driver = create_driver
     @@ca_driver.run timeout: 20, expect_emits: 1, shutdown: true
