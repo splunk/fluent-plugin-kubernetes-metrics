@@ -559,7 +559,7 @@ module Fluent
 
       def emit_container_metrics(pod_labels, container)
         tag = 'container'
-        labels = pod_labels.merge 'container-name' => container['name']
+        labels = pod_labels.merge 'container_name' => container['name']
         unless container['startTime'].nil?
           emit_uptime tag: tag, start_time: container['startTime'], labels: labels
           emit_cpu_metrics tag: tag, metrics: container['cpu'], labels: labels unless container['cpu'].nil?
@@ -571,7 +571,7 @@ module Fluent
 
       def emit_pod_metrics(node_name, pod)
         tag = 'pod'
-        labels = pod['podRef'].transform_keys &'pod-'.method(:+)
+        labels = pod['podRef'].transform_keys &'pod_'.method(:+)
         labels['node'] = node_name
 
         unless pod['startTime'].nil?
