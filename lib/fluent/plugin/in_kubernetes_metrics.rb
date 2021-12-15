@@ -614,6 +614,7 @@ module Fluent
         metrics.each do |metric|
           
           next if metric[0] == '#' or not container_name = grep_using_regex(metric, /container(?:_name)?="([^"]*)"/)
+          next if container_name.empty?
           
           metric_str, metric_val = metric.split(' ')
           metric_val = metric_val.to_f if metric_val.is_a? String

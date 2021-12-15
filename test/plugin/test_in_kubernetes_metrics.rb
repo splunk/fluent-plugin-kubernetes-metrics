@@ -61,6 +61,8 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
 
       container_name = metric.match(/container_name="\S*"/).to_s
       container_name = container_name.split('"')[1]
+      
+      next if container_name.empty?
 
       metric_str, metric_val = metric.split(' ')
       metric_val = metric_val.to_f if metric_val.is_a? String
