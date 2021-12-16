@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fluent-plugin-kubernetes-metrics (1.1.7)
+    fluent-plugin-kubernetes-metrics (1.1.8)
       fluentd (>= 1.9.1)
       kubeclient (~> 4.6.0)
       multi_json (~> 1.14.1)
