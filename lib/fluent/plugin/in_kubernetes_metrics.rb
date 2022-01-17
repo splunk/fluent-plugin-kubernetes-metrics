@@ -315,7 +315,7 @@ module Fluent
         unless metrics['time'].nil?
           time = parse_time metrics['time']
           if usage_rate = metrics['usageNanoCores']
-            router.emit generate_tag("#{tag}.cpu.usage_rate"), time, labels.merge('value' => usage_rate / 1_000_000)
+            router.emit generate_tag("#{tag}.cpu.usage_rate"), time, labels.merge('value' => usage_rate / 1_000_000.0)
           end
           if usage = metrics['usageNanoCores']
             router.emit generate_tag("#{tag}.cpu.usage"), time, labels.merge('value' => usage)
@@ -416,13 +416,13 @@ module Fluent
 
       def emit_cpu_metrics_stats(tag:, metrics:, labels:, time:)
         if cpu_usage_total = metrics['usage']['total']
-          router.emit generate_tag("#{tag}.cpu.usage.total"), time, labels.merge('value' => cpu_usage_total / 1_000_000)
+          router.emit generate_tag("#{tag}.cpu.usage.total"), time, labels.merge('value' => cpu_usage_total / 1_000_000.0)
         end
         if cpu_usage_user = metrics['usage']['user']
-          router.emit generate_tag("#{tag}.cpu.usage.user"), time, labels.merge('value' => cpu_usage_user / 1_000_000)
+          router.emit generate_tag("#{tag}.cpu.usage.user"), time, labels.merge('value' => cpu_usage_user / 1_000_000.0)
         end
         if cpu_usage_system = metrics['usage']['system']
-          router.emit generate_tag("#{tag}.cpu.usage.system"), time, labels.merge('value' => cpu_usage_system / 1_000_000)
+          router.emit generate_tag("#{tag}.cpu.usage.system"), time, labels.merge('value' => cpu_usage_system / 1_000_000.0)
         end
 
         if cpu_cfs_periods = metrics['cfs']['periods']
