@@ -115,7 +115,7 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
       assert_equal @@parsed_unit_string['node']['cpu']['usageNanoCores'], @@hash_map_test['kube.node.cpu.usage'][2]['value']
 
       assert_not_nil @@hash_map_test.key?('kube.node.cpu.usage_rate')
-      assert_equal @@parsed_unit_string['node']['cpu']['usageNanoCores'] / 1_000_000, @@hash_map_test['kube.node.cpu.usage_rate'][2]['value']
+      assert_equal @@parsed_unit_string['node']['cpu']['usageNanoCores'] / 1_000_000.0, @@hash_map_test['kube.node.cpu.usage_rate'][2]['value']
     end
 
     test 'test_emit_memory_metrics' do
