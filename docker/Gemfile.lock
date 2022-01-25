@@ -1,7 +1,7 @@
 PATH
   remote: gem
   specs:
-    fluent-plugin-kubernetes-metrics (1.1.8)
+    fluent-plugin-kubernetes-metrics (1.1.9)
       fluentd (>= 1.9.1)
       kubeclient (~> 4.6.0)
       multi_json (~> 1.14.1)
@@ -151,7 +151,6 @@ GEM
       httpclient (>= 2.4)
     webrick (1.7.0)
     yajl-ruby (1.4.1)
-    zeitwerk (2.5.1)
 
 PLATFORMS
   ruby
