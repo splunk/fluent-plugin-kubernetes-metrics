@@ -167,7 +167,7 @@ jobs:
         run: |
           cd /opt/splunk-connect-for-kubernetes
           kubectl apply -f test/test_setup.yaml
-          sleep 60
+          sleep 120
 
       - uses: actions/setup-python@v2
         with:
