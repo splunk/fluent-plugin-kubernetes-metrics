@@ -592,7 +592,6 @@ module Fluent
             end
           end
           emit_cpu_metrics tag: tag, metrics: pod['cpu'], labels: labels unless pod['cpu'].nil?
-          end
           if pod['memory'].nil?
             if pod['containers'].nil? or Array(pod['containers']).empty?
               log.warn "Summary API response has no pod memory metrics information"
