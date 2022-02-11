@@ -576,8 +576,42 @@ module Fluent
 
         unless pod['startTime'].nil?
           emit_uptime tag: tag, start_time: pod['startTime'], labels: labels
-          emit_cpu_metrics tag: tag, metrics: pod['cpu'], labels: labels if pod['cpu'] unless pod['cpu'].nil?
-          emit_memory_metrics tag: tag, metrics: pod['memory'], labels: labels if pod['memory'] unless pod['memory'].nil?
+          if pod['cpu'].nil?
+            if pod['containers'].nil? or Array(pod['containers']).empty?
+              log.warn "Summary API response has no pod cpu metrics information"
+            else
+              usageNanoCores = 0
+              usageCoreNanoSeconds = 0
+              time = nil
+              Array(pod['containers']).each do |container|
+                time = container['time'] unless container['time'].nil?
+                usageNanoCores += container['usageNanoCores']
+                usageCoreNanoSeconds += container['usageCoreNanoSeconds']
+              end
+              pod['cpu'] = { 'time' => time, 'usageNanoCores' => usageNanoCores, 'usageCoreNanoSeconds' => usageCoreNanoSeconds }
+            end
+          end
+          emit_cpu_metrics tag: tag, metrics: pod['cpu'], labels: labels unless pod['cpu'].nil?
+          if pod['memory'].nil?
+            if pod['containers'].nil? or Array(pod['containers']).empty?
+              log.warn "Summary API response has no pod memory metrics information"
+            else
+              Array(pod['containers']).each do |container|
+                time = nil
+                memory_metrics = {}
+                %w[availableBytes usageBytes workingSetBytes rssBytes pageFaults majorPageFaults].each do |name|
+                  time = container['time'] unless container['time'].nil?
+                  if value = metrics[name]
+                    memory_metrics[name] = 0 if memory_metrics[name].nil?
+                    memory_metrics[name] += value 
+                  end
+                end
+              end
+              memory_metrics['time'] = time
+              pod['memory'] = memory_metrics
+            end
+          end
+          emit_memory_metrics tag: tag, metrics: pod['memory'], labels: labels unless pod['memory'].nil?
           emit_network_metrics tag: tag, metrics: pod['network'], labels: labels unless pod['network'].nil?
           emit_fs_metrics tag: "#{tag}.ephemeral-storage", metrics: pod['ephemeral-storage'], labels: labels unless pod['ephemeral-storage'].nil?
           unless pod['volume'].nil?
@@ -595,6 +629,7 @@ module Fluent
 
       def emit_metrics(metrics)
         emit_node_metrics(metrics['node']) unless metrics['node'].nil?
+        log.warn "Summary API received empty pods info" if (metrics['pods'].nil? or metrics['pods'].empty?)
         Array(metrics['pods']).each &method(:emit_pod_metrics).curry.call(metrics['node']['nodeName']) unless metrics['pods'].nil?
       end
 
