@@ -35,10 +35,6 @@ GEM
     fluent-plugin-jq (0.5.1)
       fluentd (>= 0.14.10, < 2)
       multi_json (~> 1.13)
-    fluent-plugin-kubernetes_metadata_filter (2.9.3)
-      fluentd (>= 0.14.0, < 1.15)
-      kubeclient (>= 4.0.0, < 5.0.0)
-      lru_redux
     fluent-plugin-prometheus (2.0.2)
       fluentd (>= 1.9.1, < 2)
       prometheus-client (>= 2.1.0)
@@ -88,7 +84,6 @@ GEM
       jsonpath (~> 1.0)
       recursive-open-struct (~> 1.1, >= 1.1.1)
       rest-client (~> 2.0)
-    lru_redux (1.1.0)
     mail (2.7.1)
       mini_mime (>= 0.1.1)
     mime-types (3.4.1)
@@ -162,7 +157,6 @@ DEPENDENCIES
   bigdecimal (= 3.0.0)
   fluent-plugin-jq (= 0.5.1)
   fluent-plugin-kubernetes-metrics!
-  fluent-plugin-kubernetes_metadata_filter (>= 2.5.3)
   fluent-plugin-prometheus (>= 2.0)
   fluent-plugin-record-modifier (= 2.1.0)
   fluent-plugin-splunk-hec (>= 1.2.5)
