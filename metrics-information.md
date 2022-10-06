@@ -1,6 +1,6 @@
 # Metrics Information
 
-## The following table describes common terminology used in this topic.
+## The foillowing table describes common terminology used in this topic.
 
 | Terminology | Definition |
 | ---	| ---	|
