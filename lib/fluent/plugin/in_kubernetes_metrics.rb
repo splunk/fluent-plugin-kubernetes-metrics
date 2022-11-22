@@ -17,6 +17,7 @@ require 'time'
 require 'fluent/plugin/input'
 require 'kubeclient'
 require 'multi_json'
+require 'resolv'
 
 module Fluent
   module Plugin
@@ -75,6 +76,8 @@ module Fluent
 
       def configure(conf)
         super
+
+        @kubelet_address = "[#{@kubelet_address}]" if @kubelet_address =~ Resolv::IPv6::Regex
 
         if @use_rest_client
           raise Fluentd::ConfigError, 'node_name is required' if @node_name.nil? || @node_name.empty?
@@ -136,6 +139,7 @@ module Fluent
         if @kubernetes_url.nil?
           # Use Kubernetes default service account if we're in a pod.
           env_host = ENV['KUBERNETES_SERVICE_HOST']
+          env_host = "[#{env_host}]" if env_host =~ Resolv::IPv6::Regex
           env_port = ENV['KUBERNETES_SERVICE_PORT']
           if env_host && env_port
             @kubernetes_url = "https://#{env_host}:#{env_port}/api/"

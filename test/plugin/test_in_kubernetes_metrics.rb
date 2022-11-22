@@ -109,6 +109,30 @@ class KubernetesMetricsInputTest < Test::Unit::TestCase
     assert_equal true, d.instance.use_rest_client
   end
 
+  test 'IPv6 node configuration' do
+    IPv6_CONFIG = %(
+      type kubernetes_metrics
+      node_name generics-aws-node-name
+      tag kube.*
+      insecure_ssl true
+      interval 10s
+      use_rest_client true
+      use_rest_client_ssl false
+      kubelet_port 10_255
+      kubelet_address fd55:4d62:e00f::1
+    )
+    assert_nothing_raised(Fluent::ConfigError) do
+      create_driver(IPv6_CONFIG)
+    end
+
+    d = create_driver(IPv6_CONFIG)
+    assert_equal '[fd55:4d62:e00f::1]', d.instance.kubelet_address
+    assert_equal 'http://[fd55:4d62:e00f::1]:10255/stats/summary', d.instance.instance_variable_get('@kubelet_url')
+    assert_equal 'http://[fd55:4d62:e00f::1]:10255/stats', d.instance.instance_variable_get('@kubelet_url_stats')
+    assert_equal 'http://[fd55:4d62:e00f::1]:10255/metrics/cadvisor', d.instance.instance_variable_get('@cadvisor_url')
+
+  end
+
   sub_test_case 'node_unit_tests' do
     test 'test_emit_cpu_metrics' do
       assert_not_nil @@hash_map_test.key?('kube.node.cpu.usage')
