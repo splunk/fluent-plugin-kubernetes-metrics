@@ -1,3 +1,7 @@
+# End of Support
+
+**Important:** The fluent-plugin-kubernetes-metrics will reach End of Support on January 1, 2024. After that date, this repository will no longer receive updates from Splunk and will no longer be supported by Splunk. Until then, only critical security fixes and bug fixes will be provided.
+
 # Fluentd Plugin for Kubernetes Metrics
 
 The [Fluentd](https://fluentd.org/) input plugin collects Kubernetes cluster metrics which are exposed by the [Kubelet API](https://kubernetes.io/docs/admin/kubelet/) and forwards them to fluentd.
