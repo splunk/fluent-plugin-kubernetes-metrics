@@ -13,7 +13,7 @@
 | ephemeral-storage | Reports the total filesystem usage for the containers and emptyDir-backed volumes in the measured Pod. |
 | rootfs | Stats pertaining to container rootfs usage of filesystem resources. |
 
- Reference: https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/stats/v1alpha1/types.go
+ Reference: https://github.com/kubernetes/kubelet/blob/master/pkg/apis/stats/v1alpha1/types.go
 
 
 ## Aggregated Metrics
