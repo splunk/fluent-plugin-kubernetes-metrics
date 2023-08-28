@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fluent-plugin-kubernetes-metrics (1.2.2)
+    fluent-plugin-kubernetes-metrics (1.2.3)
       fluentd (>= 1.9.1)
       kubeclient (~> 4.9.3)
       multi_json (~> 1.14)
@@ -72,15 +72,16 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
-    rexml (3.2.5)
+    rexml (3.2.6)
     serverengine (2.3.0)
       sigdump (~> 0.2.2)
     sigdump (0.2.4)
-    simplecov (0.16.1)
+    simplecov (0.21.2)
       docile (~> 1.1)
-      json (>= 1.8, < 3)
-      simplecov-html (~> 0.10.0)
-    simplecov-html (0.10.2)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.12.3)
+    simplecov_json_formatter (0.1.4)
     strptime (0.2.5)
     test-unit (3.3.9)
       power_assert
@@ -105,7 +106,7 @@ DEPENDENCIES
   bundler (~> 2.0)
   fluent-plugin-kubernetes-metrics!
   rake (~> 13.0)
-  simplecov (~> 0.16.1)
+  simplecov
   test-unit (~> 3.3.0)
   webmock (~> 3.5.1)
 
