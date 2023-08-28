@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 group :test do
-  gem 'simplecov', '~> 0.16.1', require: false
+  gem 'simplecov', require: false
 end
 
 gemspec
