@@ -48,7 +48,6 @@ GEM
     http-parser (1.2.3)
       ffi-compiler (>= 1.0, < 2.0)
     http_parser.rb (0.8.0)
-    json (2.6.1)
     jsonpath (1.1.2)
       multi_json
     kubeclient (4.9.3)
@@ -72,7 +71,8 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
-    rexml (3.2.6)
+    rexml (3.2.8)
+      strscan (>= 3.0.9)
     serverengine (2.3.0)
       sigdump (~> 0.2.2)
     sigdump (0.2.4)
@@ -83,6 +83,7 @@ GEM
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
     strptime (0.2.5)
+    strscan (3.1.0)
     test-unit (3.3.9)
       power_assert
     tzinfo (2.0.5)
